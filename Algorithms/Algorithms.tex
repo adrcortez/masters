@@ -1,0 +1,134 @@
+\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+\usepackage[margin=0.5in]{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
+%\geometry{landscape}                		% Activate for for rotated page geometry
+%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amssymb}
+\usepackage{gensymb}
+
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\errorcontextlines 10000
+\pagenumbering{gobble}
+
+\begin{document}
+
+\begin{algorithm}[H]
+	\caption{Spiral packing - General fitting algorithm}\label{euclid}
+	\begin{algorithmic}[1]
+		
+		\Require $S_{P}$ - The parent spiral to branch off of.
+		\Require $S_{C}$ - The preferred child spiral, including position, sweep, and orientation.
+		\Ensure $S$ - A fitted spiral as close to the preferred child spiral as possible.
+		
+		\Function{fitting}{$S_{P}$, $S_{C}$}
+			\State $S \gets S_{C}$
+			\State
+			
+			\If {$S.center$ inside $S_{P}$} 
+				\State \Return error
+			\EndIf
+			\State
+			
+			\If {$S.width$ > $S_{P}.width$}
+				\State $S.width \gets S_{P}.width$
+				\State $S.center \gets \textit{new center in same direction as initially indicated by $S_{C}$}$
+			\EndIf
+			\State
+			
+			\If {$S$ does not intersect neighboring (non-parent) spirals}
+				\State \Return $S$
+			\EndIf
+			\State
+			
+			\If{$S$ intersects 2 or more neighboring spirals}
+				\ForAll{non-parent spiral}
+					\State $D_{C} \gets \textit{the current non-parent spiral approximated as a disk}$ 
+					\State $D_{P} \gets \textit{$S_{P}$ approximated as a disk}$
+					\State $D \gets \textit{the disk touching $D_{C}$ and $D_{P}$ with its center}$ 
+					\State \textit{~~~~~~ on the line connecting the centers of $S_{P}$ and $S$}
+					\State $r \gets \textit{radius of $D$}$
+					\State $S_{1}, S_{2} \gets \textit{the two spirals with the smallest $r$ values}$
+				\EndFor
+				\State
+
+				\State $S_{3} \gets \textit{the spiral fitted to $S_{1}$ and $S_{2}$}$
+				\While{$S_{3}$ intersects neighboring spirals}
+					\State $S_{4} \gets \textit{spiral with the largest intersection with $S_{3}$}$
+					\State $S_{5} \gets \textit{spiral fitted to $S_{1}$ and $S_{4}$}$
+					\State $S_{6} \gets \textit{spiral fitted to $S_{2}$ and $S_{4}$}$
+					\State $S_{3} \gets \textit{$S_{5}$ or $S_{6}$, whichever has the smallest width}$
+					\State
+					
+					\If{the width of $S_{3}$ increased}
+						\State \textbf{break}
+					\Else
+						\If{$S_{5}$ was selected}
+							\State $S_{1}, S_{2} \gets S_{1}, S_{4}$
+						\Else
+							\State $S_{1}, S_{2} \gets S_{2}, S_{4}$
+						\EndIf
+						\State
+						
+						\State $S_{3} \gets \textit{spiral fitted to $S_{1}$ and $S_{2}$}$
+					\EndIf
+				\EndWhile
+				\State
+				
+				\State $V_{S3} \gets \textit{the vector from the center of $S_{P}$ to the center of $S_{3}$}$
+				\State $V_{S} \gets \textit{the vector from the center of $S_{P}$ to the center of $S$}$
+				\State $\theta \gets \textit{the angle between $V_{S3}$ and $V_{S}$}$
+				\If{$\theta \leq 12.5\degree$}
+					\State \Return $S_{3}$
+				\EndIf
+			\EndIf
+			\State
+	\algstore{myalg}
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+	\caption{Spiral packing - General fitting algorithm (cont.)}\label{euclid}
+	\begin{algorithmic}[1]
+	\algrestore{myalg}
+			
+			\State
+			\If {$S$ intersects exactly 1 neighboring spiral}
+				\State $S_{1} \gets \textit{the intersected neighbor spiral}$
+			\Else
+				\State $S_{1} \gets \textit{bounding spiral with the smallest bounding radius, as above}$
+			\EndIf		
+			\State
+			
+			\State $S_{2} \gets \textit{spiral with the same width as $S$ branching from $S_{P}$ and touching $S_{1}$}$
+			\If{$S_{2}$ does not intersect neighboring spirals} 
+				\State $V_{S2} \gets \textit{the vector from the center of $S_{P}$ to the center of $S_{2}$}$
+				\State $V_{S} \gets \textit{the vector from the center of $S_{P}$ to the center of $S$}$
+				\State $\theta \gets \textit{the angle between $V_{S2}$ and $V_{S}$}$
+				\If{$\theta \leq 12.5\degree$}
+					\State \Return $S_{2}$
+				\EndIf
+			\EndIf
+			\State
+			
+			\State $S_{2} \gets S$
+			\While{$S_{2}$ does not intersect neighboring spirals}
+				\State $S_{1} \gets \textit{spiral with biggest intersection to $S_{2}$}$
+				\State $S_{2} \gets \textit{spiral branching from $S_{P}$, touching $S_{1}$, with its center}$
+				\State \textit{~~~~~~~ on the line connecting the centers of $S_{P}$ and $S$}
+			\EndWhile
+			\State \Return $S_{2}$
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+
+\end{document}  

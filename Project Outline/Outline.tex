@@ -1,0 +1,109 @@
+\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+\usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
+%\geometry{landscape}                		% Activate for for rotated page geometry
+%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amssymb}
+
+\begin{document}
+
+\begin{center}
+    \huge
+    \textbf{Spiral Packing}
+
+    \vspace{0.1cm}
+    \normalsize
+    \textbf{Final paper outline}
+        
+    \vspace{0.3cm}
+    \large
+    \textbf{Adrian Cortez}
+    
+    \vspace{0.1cm}
+    \small
+    \textbf{Rochester Institute of Technology}
+    \vspace{0.3cm}
+\end{center}
+
+\subsection*{Abstract}
+\begin{enumerate}
+	\item Brief explanation of the problem.
+	\item Statement of the purpose of the project.
+	\item High-level overview of the results.
+\end{enumerate}
+
+\subsection*{Background}
+\begin{enumerate}
+	\item Brief introduction
+	\begin{itemize}
+		\item What is packing?
+		\item What is spiral packing?
+	\end{itemize}
+	\item Problem description.
+	\item Description of an Archimedean spiral.
+	\begin{itemize}
+		\item Mathematical definition of a spiral.
+		\item Explanation of parameters.
+		\item Defining the area of the spiral.
+	\end{itemize}
+
+	\item Spiral packing.
+	\begin{itemize}
+		\item Definition of terms - e.g. branching, spiral sets, parent versus child, etc..
+		\item Listing the constraints to be followed when generating spiral sets. 
+		\item Detailed explanation of the three geometric cases when branching.
+	\end{itemize}
+	
+	\item Apollonian packing
+	\begin{itemize}
+		\item Description of circle packing
+		\item Explanation of how spirals are approximated using circles.
+		\item Explanation of how the  spiral packing problem is reduced to the circle packing problem using the approximation.
+	\end{itemize}
+	\item Discussion of related works.
+\end{enumerate}
+
+\subsection*{Implementation}
+\begin{enumerate}
+	\item Description of the general algorithm.
+	\item Explanation of how circle approximations are used during each branching case.
+	\item Pseudocode of the algorithm.
+	\item Description of the final program.
+	\begin{itemize}
+		\item What parts are automated?
+		\item What parts require user input?
+		\item Steps the user has to take to generate an image.
+	\end{itemize}
+\end{enumerate}
+
+\subsection*{Results}
+\begin{enumerate}
+	\item Generated images labeled with porosity.
+\end{enumerate}
+
+\subsection*{Evaluation}
+\begin{enumerate}
+	\item Discussion of how the algorithm is evaluated.
+	\item Discussion of the visual aspects of the images.
+	\begin{itemize}
+		\item Do the images look good?
+		\item Do the images look packed?
+		\item Are there any anomalies or errors?
+		\item Are there any packing configurations or shape boundaries that don't work well?
+	\end{itemize}
+	\item Calculating the porosity and discussion around the packing efficiency.
+\end{enumerate}
+
+\subsection*{Discussion}
+\begin{enumerate}
+	\item Overall discussion of the spiral packing algorithm.
+	\item Discussion of how well circle approximations worked.
+	\item Discussion of results
+	\begin{itemize}
+		\item Explanation of visual anomalies and illusionary effects.
+		\item Comments on the packing efficiency and porosity.
+	\end{itemize}
+\end{enumerate}
+\end{document}  
