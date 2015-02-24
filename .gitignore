@@ -1,8 +1,13 @@
+.DS_Store/
+
 *.class
 bin/
+.classpath
 .classpath/
+.project
 .project/
 .settings/
+.metadata/
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
