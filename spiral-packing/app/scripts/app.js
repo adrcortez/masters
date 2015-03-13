@@ -17,11 +17,15 @@
         'ngSanitize',
         'ngTouch',
 
-        'ui.select'
-    ])
-    .config(function ($routeProvider) {
+        'base64',
 
-        // Configure routes
+        'ui.select',
+        'ui.bootstrap',
+        'ui.bootstrap.contextMenu'
+    ])
+
+    // Configure routes
+    .config(function ($routeProvider) {
         $routeProvider
             .when('/', {
                 templateUrl: 'views/main.html',
@@ -30,4 +34,13 @@
             .otherwise({
                 redirectTo: '/'
             });
+    })
+
+    // Configure the whitelist for image sources and anchor hrefs
+    // to allow download of data urls
+    .config(function ($compileProvider) {
+        // var oldWhiteList = $compileProvider.imgSrcSanitizationWhitelist();
+        var pattern = /^\s*(https?|ftp|file|blob):|data:image\//;
+        $compileProvider.imgSrcSanitizationWhitelist(pattern);
+        $compileProvider.aHrefSanitizationWhitelist(pattern);
     });

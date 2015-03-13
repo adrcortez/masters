@@ -68,7 +68,7 @@ angular.module('spiralApp')
                 // Ensure the path has an even number of points
                 if (points.length % 2 === 1) {
                     var last = points[points.length - 1];
-                    points.push(last)
+                    points.push(last);
                 }
 
                 // Build the path string
@@ -88,7 +88,7 @@ angular.module('spiralApp')
 angular.module('spiralApp')
 .run(['$templateCache', function ($templateCache) {
     $templateCache.put('template/shapes/shapes.html',
-        '<svg class="shapes">\n' +
+        '<svg class="shapes" version="1.1" xmlns="http://www.w3.org/2000/svg">\n' +
         '   <div ng-transclude></div>\n' +
         '</svg>\n' +
         '');

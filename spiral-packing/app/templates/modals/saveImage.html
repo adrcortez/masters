@@ -1,0 +1,20 @@
+<div class="modal-header">
+    <h4 class="modal-title">
+        <i class="fa fa-fw fa-picture-o"></i>
+        Save Image
+    </h4>
+</div>
+
+<div class="modal-body">
+    <form>
+        <div class="form-group">
+            <label>Filename</label>
+            <input class="form-control" ng-model="filename" />
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <a class="btn btn-primary" target="_blank" ng-href="{{ dataUri }}" download="{{ filename }}.png" ng-click="save()">Save</a>
+    <a class="btn btn-warning" ng-click="cancel()">Cancel</a>
+</div>

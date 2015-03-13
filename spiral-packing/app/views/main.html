@@ -1,9 +1,11 @@
 <div id="main" class="row container-fluid">
     <div id="settings" class="col-sm-3 col-md-2">
-        <h4>
-            <i class="fa fa-fw fa-gear"></i>
-            Settings
-        </h4>
+        <legend>
+            <h4>
+                <i class="fa fa-fw fa-gear"></i>
+                Settings
+            </h4>
+        </legend>
 
         <form>
             <div class="form-group">
@@ -25,19 +27,42 @@
                 <label>Orientation (&omega;)</label>
                 <input class="form-control" type="text" ng-model="omega" />
             </div>
+
+            <div class="form-group">
+                <a class="btn btn-primary" ng-click="saveImage()">
+                    <i class="fa fa-fw fa-picture-o"></i>
+                    Save Image
+                </a>
+            </div>
         </form>
     </div>
 
     <div id="canvas" class="col-sm-9 col-md-10">
-        <shapes ng-click="addSpiral($event)">
-            <spiral ng-repeat="s in spirals track by $index"
-                    sweep="{{ s.sweep }}"
-                    width="{{ s.width }}"
-                    theta="{{ s.theta }}"
-                    omega="{{ s.omega }}"
-                    cx="{{ s.cx }}"
-                    cy="{{ s.cy }}">
-            </spiral>
+        <shapes ng-click="clear($event)">
+            <spiral ng-repeat="spiral in spirals track by $index"
+                    sweep="{{ spiral.sweep }}"
+                    width="{{ spiral.width }}"
+                    theta="{{ spiral.theta }}"
+                    omega="{{ spiral.omega }}"
+                    cx="{{ spiral.cx }}"
+                    cy="{{ spiral.cy }}"
+                    context-menu="menuOptions"
+
+                    fill="transparent"
+                    stroke="black"
+                    stroke-width="1" />
+
+            <g ng-if="branchArea">
+                <circle ng-attr-cx="{{ branchArea.cx }}"
+                        ng-attr-cy="{{ branchArea.cy }}"
+                        ng-attr-r="{{ branchArea.r2 }}"
+                        class="success"/>
+
+                <circle ng-attr-cx="{{ branchArea.cx }}"
+                        ng-attr-cy="{{ branchArea.cy }}"
+                        ng-attr-r="{{ branchArea.r1 }}"
+                        class="danger"/>
+            </g>
         </shapes>
     </div>
 </div>
