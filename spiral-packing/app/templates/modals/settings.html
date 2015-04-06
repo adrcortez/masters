@@ -1,0 +1,63 @@
+<div class="modal-header">
+    <h4 class="modal-title">
+        <i class="fa fa-fw fa-picture-o"></i>
+        Save Image
+    </h4>
+</div>
+
+<div class="modal-body">
+    <form>
+        <div class="row">
+            <div class="col-sm-6 form-group">
+                <div class="input-group clearfix">
+                    <div class="input-group-addon">Sweep (T)</div>
+                    <input type="number" class="form-control" placeholder="Sweep" ng-model="sweep">
+                    <div class="input-group-addon"></div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 form-group">
+                <div class="input-group clearfix">
+                    <div class="input-group-addon">Width (w)</div>
+                    <input type="text" class="form-control" placeholder="Width" ng-model="width">
+                    <div class="input-group-addon"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <!-- <div class="col-sm-6 form-group">
+                <div class="input-group">
+                    <div class="input-group-addon">Phase (&theta;)</div>
+                    <input type="text" class="form-control" placeholder="Phase angle" ng-model="theta">
+                    <div class="input-group-addon"></div>
+                </div>
+            </div> -->
+
+            <div class="col-sm-12 form-group">
+                <div class="input-group clearfix">
+                    <div class="input-group-addon">Orientation (&omega;)</div>
+                    <input type="text" class="form-control" placeholder="Orientation" ng-model="omega">
+                    <div class="input-group-addon"></div>
+                </div>
+            </div>
+
+            <div class="col-sm-12 form-group">
+                <div class="input-group clearfix">
+                    <div class="input-group-addon"></div>
+                    <label>
+                        <input type="checkbox" ng-model="alternate">
+                        Alternate Orientation?
+                    </label>
+                    <div class="input-group-addon"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <a class="btn btn-primary" ng-click="ok()">Save</a>
+    <a class="btn btn-warning" ng-click="cancel()">Cancel</a>
+</div>

@@ -6,16 +6,29 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
 
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
         <!-- build:css(.) styles/vendor.css -->
         <!-- bower:css -->
         <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
         <link rel="stylesheet" href="bower_components/angular-ui-select/dist/select.css" />
+        <link rel="stylesheet" href="bower_components/bootswatch-dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="bower_components/angular-ui-switch/angular-ui-switch.css" />
+        <link rel="stylesheet" href="bower_components/angular-bootstrap-colorpicker/css/colorpicker.css" />
         <!-- endbower -->
         <!-- endbuild -->
 
         <!-- build:css(.tmp) styles/main.css -->
+        <link rel="stylesheet" href="styles/transitions.css">
+        <link rel="stylesheet" href="styles/alerts.css">
+        <link rel="stylesheet" href="styles/buttons.css">
+        <link rel="stylesheet" href="styles/tabs.css">
+        <link rel="stylesheet" href="styles/forms.css">
+        <link rel="stylesheet" href="styles/header.css">
         <link rel="stylesheet" href="styles/main.css">
         <!-- endbuild -->
     </head>
@@ -27,6 +40,7 @@
             browser</a> to improve your experience.</p>
         <![endif]-->
 
+        <div ng-include="'views/header.html'"></div>
         <div ng-view=""></div>
 
         <!-- build:js(.) scripts/vendor.js -->
@@ -41,19 +55,40 @@
         <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
         <script src="bower_components/angular-touch/angular-touch.js"></script>
         <script src="bower_components/angular-ui-select/dist/select.js"></script>
-        <script src="bower_components/angular-bootstrap-contextmenu/contextMenu.js"></script>
         <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
         <script src="bower_components/angular-base64/angular-base64.js"></script>
         <script src="bower_components/angular-base64/angular-base64.min.js"></script>
+        <script src="bower_components/bootswatch-dist/js/bootstrap.js"></script>
+        <script src="bower_components/lodash/lodash.js"></script>
+        <script src="bower_components/angular-ui-switch/angular-ui-switch.js"></script>
+        <script src="bower_components/mathjs/dist/math.min.js"></script>
+        <script src="bower_components/inspector-gadget/inspector-gadget.js"></script>
+        <script src="bower_components/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.js"></script>
+        <script src="bower_components/tinycolor/tinycolor.js"></script>
         <!-- endbower -->
+
+        <script src="scripts/external/svg.js"></script>
         <!-- endbuild -->
 
         <!-- build:js({.tmp,app}) scripts/scripts.js -->
         <script src="scripts/app.js"></script>
-        <script src="scripts/controllers/main.js"></script>
 
-        <script src="scripts/directives/shapes.js"></script>
+        <!-- Factories -->
+        <script src="scripts/factories/color.js"></script>
+        <script src="scripts/factories/utility.js"></script>
+        <script src="scripts/factories/circle.js"></script>
         <script src="scripts/factories/spiral.js"></script>
+
+        <script src="scripts/services/mouse.js"></script>
+        <script src="scripts/services/settings.js"></script>
+        <script src="scripts/services/spirals.js"></script>
+
+        <script src="scripts/controllers/test.js"></script>
+        <script src="scripts/controllers/header.js"></script>
+        <script src="scripts/controllers/main.js"></script>
+        <script src="scripts/controllers/canvas.js"></script>
+
+        <script src="scripts/directives/stopEvent.js"></script>
         <!-- endbuild -->
     </body>
 </html>

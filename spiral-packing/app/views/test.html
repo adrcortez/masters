@@ -1,0 +1,69 @@
+<div id="test" class="container-fluid">
+
+    <div class="btn-toolbar" role="toolbar">
+
+        <!-- Edit mode button -->
+        <div class="btn-group">
+            <a class="btn btn-default" ng-click="test_circles()">
+                Test Circles
+            </a>
+
+            <a class="btn btn-default" ng-click="test_circles2()">
+                Test Circles 2
+            </a>
+
+            <a class="btn btn-default" ng-click="test_spirals()">
+                Test Spirals
+            </a>
+
+            <a class="btn btn-default" ng-click="test_fit(); test_fit2();">
+                Test Fit
+            </a>
+        </div>
+    </div>
+
+    <div id="canvas">
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="1000">
+
+            <circle ng-repeat="c in input.circles track by $index"
+                    ng-attr-r="{{ c.radius }}"
+                    ng-attr-cx="{{ c.center.x }}"
+                    ng-attr-cy="{{ c.center.y}} "
+                    ng-attr-stroke="{{ c.color || 'black' }}"
+                    fill="transparent" />
+
+            <circle ng-repeat="c in output.circles track by $index"
+                    ng-attr-r="{{ c.radius }}"
+                    ng-attr-cx="{{ c.center.x }}"
+                    ng-attr-cy="{{ c.center.y}} "
+                    ng-attr-stroke="{{ c.color || 'black' }}"
+                    fill="transparent"
+                    stroke-dasharray="5,7"/>
+
+            <path ng-repeat="s in input.spirals track by $index"
+                  ng-attr-stroke="{{ s.color || 'black' }}"
+                  ng-attr-d="{{ s.getPath() }}"
+                  fill="transparent" />
+
+            <path ng-repeat="s in output.spirals track by $index"
+                  ng-attr-stroke="{{ s.color || 'black' }}"
+                  ng-attr-d="{{ s.getPath() }}"
+                  fill="transparent"
+                  stroke-dasharray="5,7" />
+
+          <circle ng-repeat="p in input.points track by $index"
+                  ng-attr-cx="{{ p.x }}"
+                  ng-attr-cy="{{ p.y}} "
+                  ng-attr-stroke="{{ p.color || 'black' }}"
+                  ng-attr-fill="{{ p.color || 'black' }}"
+                  r="2" />
+
+          <circle ng-repeat="p in output.points track by $index"
+                  ng-attr-cx="{{ p.x }}"
+                  ng-attr-cy="{{ p.y}} "
+                  ng-attr-stroke="{{ p.color || 'black' }}"
+                  ng-attr-fill="{{ p.color || 'black' }}"
+                  r="2" />
+        </svg>
+    </div>
+</div>

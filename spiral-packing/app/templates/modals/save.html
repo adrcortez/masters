@@ -1,0 +1,24 @@
+<div class="modal-header">
+    <h4 class="modal-title">
+        <i class="fa fa-fw fa-picture-o"></i>
+        Save Image
+    </h4>
+</div>
+
+<div class="modal-body">
+    <form class="form-inline">
+        <div class="form-group">
+            <!-- <label>Filename</label> -->
+            <div class="input-group">
+                <div class="input-group-addon">Filename</div>
+                <input class="form-control" ng-model="filename" size="32"/>
+                <div class="input-group-addon">.png</div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <a class="btn btn-primary" ng-click="ok()">Save</a>
+    <a class="btn btn-warning" ng-click="cancel()">Cancel</a>
+</div>

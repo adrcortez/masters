@@ -1,68 +1,168 @@
-<div id="main" class="row container-fluid">
-    <div id="settings" class="col-sm-3 col-md-2">
-        <legend>
-            <h4>
-                <i class="fa fa-fw fa-gear"></i>
-                Settings
-            </h4>
-        </legend>
+<div id="main" class="container-fluid" ng-controller="CanvasCtrl">
+    <div class="btn-toolbar" role="toolbar">
 
-        <form>
-            <div class="form-group">
-                <label>Sweep (T)</label>
-                <input class="form-control" type="number" ng-model="sweep" />
-            </div>
+        <!-- Edit mode button -->
+        <div class="btn-group">
+            <a class="btn btn-default"
+               ng-class="{ 'btn-danger': drawing }"
+               ng-click="toggleDrawing()">
+                <span ng-if="!drawing">Begin Editing</span>
+                <span ng-if="drawing">Done Editing</span>
+            </a>
+        </div>
 
-            <div class="form-group">
-                <label>Width (w)</label>
-                <input class="form-control" type="number" ng-model="width" />
-            </div>
+        <!-- Seed button -->
+        <div class="btn-group" role="group">
+            <a class="btn btn-default compact"
+               ng-class="{ 'disabled': !drawing, 'btn-primary': seeding }"
+               ng-click="seed()" stop-event="click">
+                <i class="fa fa-fw fa-plus"></i>
+                <span class="compacted">Add seeds</span>
+            </a>
+        </div>
 
-            <div class="form-group">
-                <label>Starting angle (&theta;)</label>
-                <input class="form-control" type="number" ng-model="theta" />
-            </div>
+        <!-- Option/action buttons -->
+        <div class="btn-group" role="group">
 
-            <div class="form-group">
-                <label>Orientation (&omega;)</label>
-                <input class="form-control" type="text" ng-model="omega" />
-            </div>
+            <!-- Branch spiral button -->
+            <a class="btn btn-default compact"
+               ng-class="{ 'disabled': !drawing || !selected, 'btn-primary': branching }"
+               ng-click="branch()" stop-event="click">
+                <i class="fa fa-fw fa-code-fork"></i>
+                <span class="compacted">Branch</span>
+            </a>
 
-            <div class="form-group">
-                <a class="btn btn-primary" ng-click="saveImage()">
-                    <i class="fa fa-fw fa-picture-o"></i>
-                    Save Image
-                </a>
-            </div>
-        </form>
+            <!-- Edit spiral button -->
+            <a class="btn btn-default compact"
+               ng-class="{ 'disabled': !drawing || !selected }"
+               ng-click="edit()" stop-event="click">
+                <i class="fa fa-fw fa-paint-brush"></i>
+                <span class="compacted">Edit</span>
+            </a>
+
+            <!-- Delete spiral button -->
+            <a class="btn btn-default compact"
+               ng-class="{ 'disabled': !drawing || !selected }"
+               ng-click="delete()" stop-event="click">
+                <i class="fa fa-fw fa-trash"></i>
+                <span class="compacted">Delete</span>
+            </a>
+        </div>
+
+        <!-- Image export -->
+        <div class="btn-group" role="group">
+            <a class="btn btn-default compact"
+               ng-class="{ 'disabled': drawing }"
+               ng-click="saveImage()" stop-event="click">
+                <i class="fa fa-fw fa-picture-o"></i>
+                <span class="compacted">Save Image</span>
+            </a>
+
+            <a class="btn btn-default compact"
+               ng-click="settings()" stop-event="click">
+                <i class="fa fa-fw fa-cogs"></i>
+                <span class="compacted">Settings</span>
+            </a>
+        </div>
+
+        <!-- Debug button -->
+        <div class="btn-group pull-right" role="group">
+            <a class="btn btn-default compact"
+               ng-class="{ 'active btn-success': debug }"
+               ng-click="toggleDebug()" stop-event="click">
+                <i class="fa fa-fw fa-bug"></i>
+                <span class="compacted">Debug</span>
+            </a>
+        </div>
     </div>
 
-    <div id="canvas" class="col-sm-9 col-md-10">
-        <shapes ng-click="clear($event)">
-            <spiral ng-repeat="spiral in spirals track by $index"
-                    sweep="{{ spiral.sweep }}"
-                    width="{{ spiral.width }}"
-                    theta="{{ spiral.theta }}"
-                    omega="{{ spiral.omega }}"
-                    cx="{{ spiral.cx }}"
-                    cy="{{ spiral.cy }}"
-                    context-menu="menuOptions"
+    <div id="canvas">
 
-                    fill="transparent"
-                    stroke="black"
-                    stroke-width="1" />
+        <!-- Notifications -->
+        <!-- <div class="alert alert-warning slide-down clearfix"
+             ng-show="hasNotification">
 
-            <g ng-if="branchArea">
-                <circle ng-attr-cx="{{ branchArea.cx }}"
-                        ng-attr-cy="{{ branchArea.cy }}"
-                        ng-attr-r="{{ branchArea.r2 }}"
-                        class="success"/>
+            <a class="close" ng-click="hideNotification()" stop-event="click">
+                ×
+            </a>
 
-                <circle ng-attr-cx="{{ branchArea.cx }}"
-                        ng-attr-cy="{{ branchArea.cy }}"
-                        ng-attr-r="{{ branchArea.r1 }}"
-                        class="danger"/>
+            <div class="form-group" ng-if="drawing && !selected" >
+                <span ng-if="branching">
+                    Choose a spiral to <b>branch</b> from.
+                </span>
+
+                <span ng-if="editing">
+                    Choose a spiral to <b>edit</b>.
+                </span>
+
+                <span ng-switch-default>
+                    Click on one of the buttons to the right to
+                </span>
+            </div>
+
+            <div>
+                When you're finished editing, click the
+                <b>'Done Editing'</b> button to exit edit mode.
+            </div>
+        </div> -->
+
+
+        <!-- The actual 'canvas' -->
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+             ng-class="{ 'selectable': drawing && selecting }"
+             ng-click="click($event)"
+             stop-event="click">
+
+             <g ng-if="debug">
+                 <g ng-if="S">
+                     <path ng-attr-d="{{ S.getPath() }}" stroke="pink" fill="transparent"/>
+                     <circle ng-attr-r="{{S.width * (S.sweep - 1)}}" ng-attr-cx="{{S.center.x}}" ng-attr-cy="{{S.center.y}}"
+                             fill="transparent" stroke="black" stroke-dasharray="5,7"/>
+                 </g>
+
+                 <circle ng-if="bc0" ng-attr-r="{{bc0.radius+1}}" ng-attr-cx="{{bc0.center.x}}" ng-attr-cy="{{bc0.center.y}}" fill="transparent" stroke="blue" stroke-width="1" stroke-dasharray="5,7"/>
+                 <circle ng-if="bc1" ng-attr-r="{{bc1.radius+1}}" ng-attr-cx="{{bc1.center.x}}" ng-attr-cy="{{bc1.center.y}}" fill="transparent" stroke="red" stroke-width="1" stroke-dasharray="5,7"/>
+                 <circle ng-if="bc2" ng-attr-r="{{bc2.radius+1}}" ng-attr-cx="{{bc2.center.x}}" ng-attr-cy="{{bc2.center.y}}" fill="transparent" stroke="green" stroke-width="1" stroke-dasharray="5,7"/>
+                 <circle ng-if="bc3" ng-attr-r="{{bc3.radius+1}}" ng-attr-cx="{{bc3.center.x}}" ng-attr-cy="{{bc3.center.y}}" fill="transparent" stroke="orange" stroke-width="1" stroke-dasharray="5,7"/>
+
+                 <circle ng-if="rs2" ng-attr-r="{{rs2.radius}}" ng-attr-cx="{{rs2.center.x}}" ng-attr-cy="{{rs2.center.y}}" fill="transparent" stroke="green" />
+                 <circle ng-if="rs3" ng-attr-r="{{rs3.radius}}" ng-attr-cx="{{rs3.center.x}}" ng-attr-cy="{{rs3.center.y}}" fill="transparent" stroke="orange" />
+
+                 <circle ng-if="circles" ng-repeat="c in circles track by $index"
+                         ng-attr-r="{{c.radius}}" ng-attr-cx="{{c.center.x}}" ng-attr-cy="{{c.center.y}}"
+                         fill="transparent" ng-attr-stroke="{{ c.color || 'black' }}" stroke-dasharray="5, 7"/>
+
+                 <circle ng-if="points" ng-repeat="p in points track by $index"
+                         r="3" ng-attr-cx="{{p.x}}" ng-attr-cy="{{p.y}}" ng-attr-fill="{{ p.color || 'black' }}" ng-attr-stroke="{{ p.color || 'black' }}"/>
+             </g>
+
+            <!-- Spirals -->
+            <g class="spiral"
+               ng-repeat="s in getSpirals() track by $index"
+               ng-init="paths = s.getPaths(); inPaths = s.getInnerPaths()"
+               ng-class="{ 'selected': drawing && isSelected(s) }"
+               ng-click="select(s)"
+               stop-event="click">
+
+               <!-- The spiral paths -->
+               <path ng-repeat="p in paths track by $index"
+                     ng-attr-d="{{ p.toString() }}"
+                     stroke="black"
+                     stroke-width="1"/>
+
+               <path ng-repeat="p in inPaths track by $index"
+                     ng-attr-d="{{ p.toString() }}"
+                     ng-attr-stroke="{{ ['red', 'green', 'blue', 'yellow', 'orange'][$index % 5] }}"
+                     ng-attr-stroke-width="{{ s.width }}"/>
+               <!-- <path ng-attr-stroke-width="{{ s.width }}" ng-attr-d="{{ s.getPath() }}" stroke="red"/> -->
+
+               <text ng-if="debug"
+                     ng-attr-x="{{ s.center.x }}"
+                     ng-attr-y="{{ s.center.y }}"
+                     fill="black">
+                     {{ $index }}
+                </text>
             </g>
-        </shapes>
+        </svg>
     </div>
 </div>

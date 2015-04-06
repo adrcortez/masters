@@ -2,6 +2,8 @@ html, body {
     width: 100%;
     height: 100%;
     color: #333;
+    background: #a6a6a6;
+    line-height: 1.42857143;
 }
 
 div[ng-view] {
@@ -10,11 +12,30 @@ div[ng-view] {
 }
 
 legend {
-    border-bottom-color: #B2B2B2;
+    /*border-bottom-color: #B2B2B2;*/
+    color: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    text-transform: capitalize;
 }
 
 .modal-backdrop {
     bottom: 0;
+}
+
+.contextMenu ul {
+    padding: 0;
+}
+.contextMenu li {
+    padding: 0px;
+}
+.contextMenu li.divider {
+    margin: 0;
+}
+
+.contextMenu li:last-child.divider {
+    display: none;
 }
 
 #main {
@@ -29,45 +50,39 @@ legend {
 }
 
 #canvas {
+    position: relative;
+    background: #fff;
+    width: 100%;
+    max-width: 960px;
     height: 100%;
     min-height: 600px;
-    padding: 0;
+    margin: 0 auto;
+    overflow: hidden;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.4);
 }
+
 
 svg {
     width: 100%;
     height: 100%;
+    background: #ffffff;
 }
 
-svg circle {
-    fill: transparent;
-    stroke: #ccc;
-    stroke-width: 2;
+    svg .spiral {
+        opacity: 1;
+        transition: all 0.5s;
+    }
 
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
-    filter: alpha(opacity=20);
-    -moz-opacity: 0.2;
-    -khtml-opacity: 0.2;
-    opacity: 0.2;
-}
+        svg .spiral path {
+            fill: transparent;
+        }
 
-svg circle.success {
-    fill: #5cb85c;
-    stroke: #4cae4c;
-    cursor: crosshair;
-}
+        svg .spiral.selected path {
+            stroke: #2196f3 !important;
+            cursor: default !important;
+        }
 
-svg circle.danger {
-    fill: #d9534f;
-    stroke: #d43f3a;
-    cursor: not-allowed;
-}
-
-svg path.spiral:hover {
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
-    filter: alpha(opacity=50);
-    -moz-opacity: 0.5;
-    -khtml-opacity: 0.5;
-    opacity: 0.5;
-    cursor: pointer;
-}
+        svg .spiral:hover path {
+            stroke: #ff9800;
+            cursor: pointer;
+        }
