@@ -1,0 +1,21 @@
+.navbar {
+    margin-bottom: 0;
+    border-radius: 0;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #e7e7e7;
+    z-index: 1000;
+}
+
+.navbar .navbar-brand {
+    cursor: default;
+}
+
+    .navbar .navbar-brand img {
+        height: 200%;
+        margin-top: -25%;
+        float: left;
+    }
+
+.navbar ul.navbar-nav li {
+    cursor: pointer;
+}

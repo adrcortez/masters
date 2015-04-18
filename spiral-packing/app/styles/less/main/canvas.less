@@ -1,0 +1,22 @@
+.canvas {
+    display: block;
+    min-width: 640px;
+    min-height: 480px;
+    background: #fff;
+    margin: 0 16px;
+    margin-bottom: 16px;
+    outline: none;
+
+    .editing {
+        cursor: crosshair;
+    }
+
+    .spiral {
+        opacity: 1;
+        transition: all 0.5s;
+
+        &:hover path {
+            cursor: pointer;
+        }
+    }
+}

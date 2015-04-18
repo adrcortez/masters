@@ -1,0 +1,62 @@
+<md-content class="md-toolbar-tools md-hue-1" layout="row" layout-align="end center">
+    <div layout="row" layout="center center">
+        <md-button class="md-icon-button md-mini md-accent md-hue-3" ng-disabled="isZoomOutDisabled()" ng-click="zoomOut()" aria-label="zoom out">
+            <md-icon md-font-icon="mdi mdi-lg mdi-remove-circle-outline"></md-icon>
+        </md-button>
+        <md-button md-no-ink class="md-icon-button md-mini md-primary">{{ 100 * zoom }}%</md-button>
+        <md-button class="md-icon-button md-mini md-accent md-hue-3" ng-disabled="isZoomInDisabled()" ng-click="zoomIn()" aria-label="zoom in">
+            <md-icon md-font-icon="mdi mdi-lg mdi-add-circle-outline"></md-icon>
+        </md-button>
+    </div>
+
+    <div layout="row" layout="end center">
+        <!-- Image export -->
+        <md-button class="md-icon-button md-mini md-hue-1 md-raised" ng-click="showExport($event)">
+            <md-icon md-font-icon="mdi mdi-lg mdi-save"></md-icon> Save Image
+        </md-button>
+
+        <!-- Add seeds button -->
+        <md-button class="md-icon-button md-mini md-hue-1 md-raised" ng-class="{ 'active md-primary md-hue-2': seeding }" ng-click="seed()">
+            <md-icon md-font-icon="mdi mdi-lg mdi-polymer"></md-icon> Add Seeds
+        </md-button>
+        <!-- <a class="btn btn-sm btn-default" ng-class="{ 'active btn-primary': seeding }" ng-click="seed()">
+            <i class="fa fa-fw fa-plus"></i>
+            <span class="compacted">Add Seeds</span>
+        </a> -->
+
+        <!-- Debug button -->
+        <md-button class="md-icon-button md-mini md-hue-1 md-raised" ng-class="{ 'active md-warn md-hue-2': debug }" ng-click="toggleDebug()">
+            <md-icon md-font-icon="mdi mdi-lg mdi-bug-report"></md-icon> Debug
+        </md-button>
+    </div>
+</md-content>
+
+<md-content class="md-hue-1" layout="column" flex>
+    <svg-canvas class="canvas flex md-whiteframe-z1" ng-class="{ editing: callback }" scale="{{ zoom }}" ng-click="canvasClick($event)">
+        <g ng-repeat="s in getSpirals() track by $index" data-target="menu-{{ $index }}" context-menu>
+            <svg-spiral sweep="s.sweep" width="s.width"
+                        theta="s.theta" omega="s.omega"
+                        cx="s.center.x" cy="s.center.y"
+                        colors="['#0000ff', '#0000ff', '#ffff00', '#ff0000']"
+                        stroke="white" stroke-width="1" gloss="hasGloss()">
+            </svg-spiral>
+        </g>
+
+        <!-- <svg-spiral sweep="3" width="40" cx="500" cy="250" colors="['#000000', '#fff']" stroke="black" stroke-width="10"></svg-spiral> -->
+    </svg-canvas>
+
+    <div ng-repeat="s in getSpirals() track by $index" id="menu-{{ $index }}" class="context-menu dropdown">
+        <ul class="dropdown-menu" role="menu">
+            <li role="menuitem" tabindex="1">
+                <a ng-click="branch(s, $event)">
+                    <i class="fa fa-fw fa-code-fork"></i> Branch
+                </a>
+            </li>
+            <li role="menuitem" tabindex="2">
+                <a ng-click="delete(s, $event)">
+                    <i class="fa fa-fw fa-trash"></i> Delete
+                </a>
+            </li>
+        </ul>
+    </div>
+</md-content>

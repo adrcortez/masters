@@ -1,0 +1,139 @@
+.flex {
+  display: -webkit-box;
+  /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -moz-box;
+  /* OLD - Firefox 19- (buggy but mostly works) */
+  display: -ms-flexbox;
+  /* TWEENER - IE 10 */
+  display: -webkit-flex;
+  /* NEW - Chrome */
+  display: flex;
+  /* NEW, Spec - Opera 12.1, Firefox 20+ */
+  -webkit-box-flex: 1;
+  /* OLD - iOS 6-, Safari 3.1-6 */
+  -moz-box-flex: 1;
+  /* OLD - Firefox 19- */
+  -webkit-flex: 1;
+  /* Chrome */
+  -ms-flex: 1;
+  /* IE 10 */
+  flex: 1;
+  /* NEW, Spec - Opera 12.1, Firefox 20+ */
+}
+form {
+  padding: 8px 16px;
+}
+legend {
+  color: inherit;
+}
+.modal-backdrop {
+  bottom: 0;
+}
+#main {
+  position: relative;
+  height: 100%;
+}
+input.form-control:focus {
+  color: #333;
+}
+.context-menu {
+  position: fixed;
+}
+.context-menu .dropdown-menu {
+  min-width: 120px;
+  width: auto;
+  padding: 0;
+  margin-left: 2px;
+  border: 1px solid #e6e6e6;
+}
+.context-menu li {
+  border-bottom: 1px solid #e6e6e6;
+  border-radius: 0px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+.context-menu li a {
+  border-radius: 0px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0.5em 1em;
+  border-radius: in;
+}
+.context-menu li:hover a {
+  background: #2196f3;
+  color: #ffffff;
+}
+.context-menu li:first-child,
+.context-menu li:first-child a {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+.context-menu li:last-child,
+.context-menu li:last-child a {
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+md-icon {
+  display: inline !important;
+  color: inherit !important;
+  vertical-align: baseline !important;
+}
+.md-button {
+  padding: 0 1.0rem;
+}
+.md-button.md-icon-button.md-mini {
+  height: 3.2rem;
+  width: auto;
+  line-height: 3.2rem;
+  padding: 0 0.8rem;
+}
+.md-button.disabled,
+.md-button[disabled] {
+  opacity: 0.5 !important;
+}
+md-sidenav {
+  min-width: 0 !important;
+  width: auto !important;
+}
+md-sidenav md-content.md-default-theme {
+  background-color: #f6f6f6;
+}
+md-sidenav md-content.md-default-theme menu-link {
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+md-sidenav md-content.md-default-theme menu-link .md-button {
+  border-radius: 0 !important;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+  line-height: 40px;
+  margin: 0;
+  max-height: 40px;
+  overflow: hidden;
+  padding: 0px 16px;
+  text-align: left;
+  text-decoration: none;
+  white-space: normal;
+  width: 100%;
+}
+.canvas {
+  display: block;
+  min-width: 640px;
+  min-height: 480px;
+  background: #fff;
+  margin: 0 16px;
+  margin-bottom: 16px;
+  outline: none;
+}
+.canvas .editing {
+  cursor: crosshair;
+}
+.canvas .spiral {
+  opacity: 1;
+  transition: all 0.5s;
+}
+.canvas .spiral:hover path {
+  cursor: pointer;
+}
