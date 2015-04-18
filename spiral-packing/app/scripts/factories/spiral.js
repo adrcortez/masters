@@ -1,54 +1,37 @@
 'use strict';
 
-angular.module('spiralApp')
+angular
+    .module('spiralApp')
+    .factory('Spiral', function (epsilon, Shape, Path, Point2, Vector2, Circle, Color, Gradient) {
 
-    .factory('Spiral', function (epsilon, Path, Point2, Vector2, Circle) {
+        // Constants
+        var NUM_SEGMENTS = 20;
+
 
         // Define the constructor
-        function Spiral (sweep, width, theta, omega, center) {
+        function Spiral (sweep, width, theta, omega, x, y) {
+
+            // Call the parent constructor
+            Shape.call(this);
+
             this.sweep = sweep || 0;
             this.width = width || 0;
             this.theta = theta || 0;
             this.omega = omega || 1;
-            this.center = Point2.copy(center);
+            this.center = new Point2(x, y);
 
             this.parent = null;
             this.children = [];
-
-            this.fillColor = null;
-            this.strokeColor = null;
         }
 
 
-        // Instance methods
-        Spiral.prototype = {
-
-            getFillColor: function () {
-                return this.fillColor || null;
-            },
-
-            setFillColor: function (value) {
-                this.fillColor = value || null;
-            },
+        // Extend the parent
+        Spiral.prototype = Object.create(Shape.prototype);
+        Spiral.prototype.constructor = Spiral;
 
 
-            getStrokeColor: function () {
-                return this.strokeColor || null;
-            },
-
-            setStrokeColor: function (value) {
-                this.strokeColor = value || null;
-            },
-
-
-            getStrokeWidth: function () {
-                return this.strokeWidth || null;
-            },
-
-            setStrokeWidth: function (value) {
-                this.strokeWidth = value || null;
-            },
-
+        // Add the instance methods
+        angular.extend(Spiral.prototype, {
 
             equals: function (s) {
 
@@ -76,18 +59,6 @@ angular.module('spiralApp')
                 // Get the edge of the spiral in the
                 // direction of the given point
                 var p = this.getEdgePoint(x, y);
-
-                // The distance between the edge point
-                // and the spiral center is the radius
-                // of the circle in the direction of x, y
-                return this.center.getDistance(p);
-            },
-
-            getOppositeRadius: function (x, y) {
-
-                // Get the edge of the spiral in the
-                // opposite direction of the given point
-                var p = this.getOppositeEdgePoint(x, y);
 
                 // The distance between the edge point
                 // and the spiral center is the radius
@@ -177,12 +148,12 @@ angular.module('spiralApp')
                     p = new Point2(x, y);
 
                 // The vectors used to determine the angle
-                var vcp = new Vector2(c, p),
-                    vcu = new Vector2(c, u);
+                var vcu = new Vector2(c, u),
+                    vcp = new Vector2(c, p);
 
                 // Get the possible edge points
-                var phi = vcp.angle(vcu),
-                    t = phi/(2*Math.PI),
+                var phi = vcu.angle(vcp),
+                    t = Math.abs(phi / (2*Math.PI)),
                     t1 = this.sweep - t,
                     t2 = (this.sweep - 1) + t;
 
@@ -193,16 +164,6 @@ angular.module('spiralApp')
                 var sd1 = p.getSquaredDistance(p1);
                 var sd2 = p.getSquaredDistance(p2);
                 return sd1 < sd2 ? p1 : p2;
-            },
-
-            getOppositeEdgePoint: function (x, y) {
-
-                var dx = this.center.x - x,
-                    dy = this.center.y - y,
-                    x = this.center.x + dx,
-                    y = this.center.y + dy;
-
-                return this.getEdgePoint(x, y);
             },
 
             shouldClip: function (t) {
@@ -229,116 +190,106 @@ angular.module('spiralApp')
 
             getPath: function () {
 
-                var path = '';
-                var segment = new Path();
+                var path = new Path(),
+                    tdelta = 1 / NUM_SEGMENTS;
 
-                // Start the path
-                var delta = 0.01;
-                for (var t = 0; t <= this.sweep; t += delta) {
-                    var clipped = this.shouldClip(t);
+                // Break the path into multiple curves
+                for (var t = 0; t <= this.sweep; t += tdelta) {
 
-                    if (clipped) {
+                    var tmin = t,
+                        tmax = Math.min(t + tdelta, this.sweep) + 0.005,
+                        tmid = (tmin + tmax) / 2;
 
-                        // Keep track of the path segment so far
-                        path += segment ? segment.toString() : '';
-                        segment = new Path();
-                    } else {
+                    // Get the points the bezier curve should go through
+                    var p0 = this.getPoint(tmin),
+                        p1 = this.getPoint(tmid),
+                        p2 = this.getPoint(tmax);
 
-                        // Add the point to the current path
-                        // or a new path if there is not current
-                        var p = this.getPoint(t);
-                        segment.addPoint(p);
-                    }
+                    // Calculate the control point
+                    var cx = 2*p1.x - p0.x/2 - p2.x/2,
+                        cy = 2*p1.y - p0.y/2 - p2.y/2,
+                        control = new Point2(cx, cy);
+
+                    // Add the curve
+                    path.moveTo(p0);
+                    path.bezierTo(p2, control);
                 }
 
-                // Make sure the current path segment is added
-                path += segment ? segment.toString() : '';
+                return path;
+            },
 
-                // Return the path
+
+            getPathSegment: function (t0, t1, t2, t3) {
+
+                // Get the four boundary points of the
+                // path segement
+                var p0 = this.getPoint(t0),
+                    p1 = this.getPoint(t1),
+                    p2 = this.getPoint(t2),
+                    p3 = this.getPoint(t3);
+
+                // Determine the control point needed for the
+                // outer curve of the segment
+                var q1 = (t0 + t1) / 2,
+                    i1 = this.getPoint(q1),
+                    c1 = Path.getControlPoint(p0, i1, p1);
+
+                // Determine the control point needed for the
+                // inner curve of the segment
+                var q2 = (t2 + t3) / 2,
+                    i2 = this.getPoint(q2),
+                    c2 = Path.getControlPoint(p2, i2, p3);
+
+                // The SVG path for the segment
+                var path = new Path()
+                    .moveTo(p0).bezierTo(p1, c1)
+                    .lineTo(p2).bezierTo(p3, c2)
+                    .close();
+
+
+                // TODO: Use the spirals color list
+                var n = Math.ceil(this.sweep * NUM_SEGMENTS),
+                    i = Math.floor(t0 * NUM_SEGMENTS),
+                    colors = Color.split(n + 1, ['#0000ff', '#0000ff', '#ffff00', '#ff0000']);
+
+                // Determine the fill for the path segment
+                var color1 = colors[i],
+                    color2 = colors[i + 1],
+                    mx0 = (p0.x + p3.x) / 2,
+                    my0 = (p0.y + p3.y) / 2,
+                    mx1 = (p1.x + p2.x) / 2,
+                    my1 = (p1.y + p2.y) / 2,
+                    gradient = new Gradient(color1, color2, mx0, my0, mx1, my1);
+
+                // Set the path fill
+                path.setFill(gradient);
+
+                // Return the SVG path
                 return path;
             },
 
             getPaths: function () {
 
                 var paths = [],
-                    rdelta = 0.25,
-                    tdelta = 0.01;
+                    numPaths = this.sweep * NUM_SEGMENTS;
 
-                // Break the full path into half-radian segments
-                for (var r = 0; r <= this.sweep; r += rdelta) {
+                for (var i = 0; i < numPaths; i++) {
 
-                    var tmin = r,
-                        tmax = Math.min(r + rdelta, this.sweep) + epsilon;
+                    var tmin = i / NUM_SEGMENTS,
+                        tmax = (i + 1) / NUM_SEGMENTS;
 
-                    // The current path segment
-                    var path = new Path();
+                    var t0 = Math.max(tmin, 0),
+                        t1 = Math.min(tmax, this.sweep) + 0.005,
+                        t2 = Math.max(t1 - 1, 0),
+                        t3 = Math.max(t0 - 1, 0);
 
-                    // Generate the path for this segment
-                    for (var t = tmin; t <= tmax; t += tdelta) {
-
-                        // Add the point to the current path segment
-                        var p = this.getPoint(t);
-                        path.addPoint(p);
-                    }
-
-                    // Add this segement to the list of path segments
+                    var path = this.getPathSegment(t0, t1, t2, t3);
                     paths.push(path);
                 }
 
                 return paths;
-            },
-
-            getInnerPaths: function () {
-
-                // Create a spiral that is the same as this spiral
-                // offset by 1 radian and with one less half-turn
-                var s = this.clone();
-                s.theta = this.theta + Math.PI;
-                s.sweep = this.sweep - 0.5;
-
-                // The new spiral's path will trace through center of
-                // this spiral, effectively becoming the inner path of
-                // this spiral
-                return s.getPaths();
-            },
-
-            getBoundingCircle: function (S, S0, SP) {
-
-                // The maximum radius of the bounding circle
-                // for this disc
-                var r = this.width * this.sweep;
-
-                // If S is specified, then we can make a better
-                // approximation for the bounding circle
-                if (S && SP) {
-
-                    var ri = this.getRadius(S.center.x, S.center.y),
-                        rsi = this.equals(SP) ?
-                            S.width * (S.sweep - 1) :
-                            S.getRadius(this.center.x, this.center.y);
-
-                    var rso = S0.width * (S0.sweep - 1),
-                        r = ri - (rsi - rso);
-
-                    if (!this.equals(SP)) {
-                        console.log('rsi = ' + rsi);
-                        console.log('rso = ' + rso);
-                        console.log(' ');
-                    }
-                }
-
-                // Return the circle centered at the spiral center
-                var circle = new Circle(r, this.center);
-                circle.color = this.color;
-                return circle;
             }
-        };
-
-        Spiral.copy = function (s) {
-            return s ?
-                new Spiral(s.sweep, s.width, s.theta, s.omega, s.center) :
-                null;
-        };
+        });
 
 
         // Return the constructor

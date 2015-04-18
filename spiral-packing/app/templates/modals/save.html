@@ -1,24 +1,30 @@
-<div class="modal-header">
-    <h4 class="modal-title">
-        <i class="fa fa-fw fa-picture-o"></i>
-        Save Image
-    </h4>
-</div>
+<md-dialog aria-label="Save Image">
+    <md-subheader class="md-sticky-no-effect">
+        <h4 class="md-subhead">
+            <md-icon md-font-icon="mdi mdi-lg mdi-save"></md-icon>
+            Save Image
+        </h4>
+    </md-subheader>
 
-<div class="modal-body">
-    <form class="form-inline">
-        <div class="form-group">
-            <!-- <label>Filename</label> -->
-            <div class="input-group">
-                <div class="input-group-addon">Filename</div>
-                <input class="form-control" ng-model="filename" size="32"/>
-                <div class="input-group-addon">.png</div>
+    <md-content class="dialog-content sticky-container">
+        <form name="saveform" novalidate>
+            <md-input-container>
+                <label>Filename</label>
+                <input name="filename" ng-model="filename" required>
+                <div ng-messages="saveform.filename.$error">
+                    <div ng-message="required">Required</div>
+                </div>
+            </md-input-container>
+
+            <div layout="row">
+                <md-button class="md-hue-1 md-mini" ng-class="{ 'md-accent md-raised md-hue-2 active': !type || type === 'png' }" ng-click="type = 'png'">.png</md-button>
+                <md-button class="md-hue-1 md-mini" ng-class="{ 'md-accent md-raised md-hue-2 active': type === 'jpg' }" ng-click="type = 'jpg'">.jpg</md-button>
             </div>
-        </div>
-    </form>
-</div>
+        </form>
+    </md-content>
 
-<div class="modal-footer">
-    <a class="btn btn-primary" ng-click="ok()">Save</a>
-    <a class="btn btn-warning" ng-click="cancel()">Cancel</a>
-</div>
+    <div class="md-actions" layout="row">
+        <md-button class="md-mini" ng-click="cancel()">Cancel</md-button>
+        <md-button class="md-primary md-raised md-hue-2 md-mini" ng-click="ok()">Save</md-button>
+    </div>
+</md-dialog>

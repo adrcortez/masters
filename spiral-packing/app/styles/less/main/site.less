@@ -1,0 +1,113 @@
+legend {
+    color: inherit;
+}
+
+.modal-backdrop {
+    bottom: 0;
+}
+
+#main {
+    position: relative;
+    height:100%;
+}
+
+input.form-control:focus {
+    color: #333;
+}
+
+.context-menu {
+    position: fixed;
+
+    .dropdown-menu {
+        min-width: 120px;
+        width: auto;
+        padding: 0;
+        margin-left: 2px;
+        border: 1px solid #e6e6e6
+    }
+
+    li {
+        border-bottom: 1px solid #e6e6e6;
+        border-radius: 0px;
+        border: none;
+        outline: none;
+        cursor: pointer;
+
+        a {
+          border-radius: 0px;
+          border: none;
+          outline: none;
+          cursor: pointer;
+          padding: 0.5em 1em;
+          border-radius: in
+        }
+
+        &:hover a {
+            background: #2196f3;
+            color: #ffffff;
+        }
+
+        &:first-child,
+        &:first-child a {
+            border-top-left-radius: inherit;
+            border-top-right-radius: inherit;
+        }
+
+        &:last-child,
+        &:last-child a {
+            border-bottom-left-radius: inherit;
+            border-bottom-right-radius: inherit;
+        }
+    }
+}
+
+md-icon {
+    display: inline !important;
+    color: inherit !important;
+    vertical-align: baseline !important;
+}
+
+.md-button {
+    padding: 0 1.0rem;
+
+    &.md-icon-button.md-mini {
+        height: 3.2rem;
+        width: auto;
+        line-height: 3.2rem;
+        padding: 0 0.8rem;
+    }
+
+    &.disabled,
+    &[disabled] {
+        opacity: 0.5 !important;
+    }
+}
+
+md-sidenav {
+    min-width: 0 !important;
+    width: auto !important;
+
+    md-content.md-default-theme {
+        background-color: #f6f6f6;
+
+        menu-link {
+            border-top: 1px solid rgba(0, 0, 0, 0.12);
+
+            .md-button {
+                border-radius: 0 !important;
+                color: inherit;
+                cursor: pointer;
+                display: block;
+                line-height: 40px;
+                margin: 0;
+                max-height: 40px;
+                overflow: hidden;
+                padding: 0px 16px;
+                text-align: left;
+                text-decoration: none;
+                white-space: normal;
+                width: 100%;
+            }
+        }
+    }
+}

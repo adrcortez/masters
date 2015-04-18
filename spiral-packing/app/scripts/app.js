@@ -1,5 +1,6 @@
 'use strict';
 
+
 /**
  * @ngdoc overview
  * @name spiralApp
@@ -16,15 +17,10 @@
         'ngRoute',
         'ngSanitize',
         'ngTouch',
+        'ngResize',
 
-        'ui.select',
-        'ui.bootstrap',
-        'uiSwitch',
-        'colorpicker.module'
+        'main'
     ])
-
-    // Constants
-    .constant('epsilon', 0.00001)
 
     // Configure routes
     .config(function ($routeProvider) {
@@ -32,10 +28,6 @@
             .when('/', {
                 templateUrl: 'views/main.html',
                 controller: 'MainCtrl'
-            })
-            .when('/test', {
-                templateUrl: 'views/test.html',
-                controller: 'TestCtrl'
             })
             .otherwise({
                 redirectTo: '/'

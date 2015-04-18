@@ -145,10 +145,12 @@ angular.module('spiralApp')
                 return s0.intersects(s) || s1.intersects(s);
             });
 
-            // Return the seed spirals if they don't intersect
+            // Add and return the seed spirals if they can be placed
             if (!intersects) {
                 this.add(s0);
                 this.add(s1);
+
+                return [s0, s1];
             }
         };
 

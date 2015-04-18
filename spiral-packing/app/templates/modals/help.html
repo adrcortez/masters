@@ -1,6 +1,55 @@
-<div class="modal-header">
+<md-dialog aria-label="Save Image">
+
+    <md-subheader class="md-sticky-no-effect">
+        <h2 class="md-subhead">
+            <md-icon md-font-icon="mdi mdi-lg mdi-help"></md-icon>
+            How does this thing work?
+        </h2>
+    </md-subheader>
+
+    <md-content class="dialog-content sticky-container">
+        <md-tabs md-dynamic-height md-border-bottom>
+            <md-tab label="Components">
+                <md-content class="md-padding">
+                    <h1 class="md-subhead">The Drawing Area</h1>
+                    <p></p>
+
+                    <h5 class="md-display-subhead">Edit Mode</h5>
+                    <p>Something about edit mode...</p>
+                    <p>When you're finished editing, click the <b>'Done Editing'</b> button to exit edit mode.</p>
+                </md-content>
+            </md-tab>
+
+            <md-tab label="General Actions">
+                <md-content class="md-padding">
+                    <h1 class="md-display-2">Adding Seed Spirals</h1>
+                    <p>Click on the drawing area to place seed spirals.</p>
+                </md-content>
+            </md-tab>
+
+            <md-tab label="Specific Actions">
+                <md-content class="md-padding">
+                    <h1 class="md-display-2">Editing Spirals</h1>
+                    <p></p>
+
+                    <h5 class="md-display-subhead">Branching Spirals</h5>
+                    <p>Click on the drawing area to place new spirals.</p>
+                </md-content>
+            </md-tab>
+        </md-tabs>
+    </md-content>
+
+    <div class="md-actions" layout="row">
+        <md-button ng-click="ok()" class="md-primary md-raised">
+            <md-icon md-font-icon="mdi mdi-lg mdi-done"></md-icon> Gotcha
+        </md-button>
+    </div>
+</md-dialog>
+
+
+<!-- <div class="modal-header">
     <h4 class="modal-title">
-        <i class="fa fa-fw fa-question-circle"></i>
+        <i class="fa fa-fw fa-life-ring"></i>
         How does this thing work?
     </h4>
 </div>
@@ -48,4 +97,4 @@
     <a class="btn btn-success" ng-click="$close()">
         Gotcha <i class="fa fa-check"></i>
     </a>
-</div>
+</div> -->

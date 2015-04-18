@@ -5,14 +5,23 @@
     -webkit-transition: background-size 0.2s;
 }
 
-.btn-xs {
+    .btn.active, .btn.disabled, .btn[disabled] {
+        margin-top: 1px;
+    }
+    
+.btn.btn-sm {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.btn.btn-xs {
     padding-left: 8px;
     padding-right: 8px;
 }
 
-.btn-group,
-.btn-group-vertical {
-    margin: 10px;
+.btn-toolbar {
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .btn-group.fade,
@@ -39,11 +48,11 @@
         right: 0;
     }
 
-.btn-group-vertical .btn {
+/*.btn-group-vertical .btn {
     float: left;
     width: auto;
     clear: right;
-}
+}*/
 
     .btn-group-vertical.btn-group-right .btn {
         float: right;

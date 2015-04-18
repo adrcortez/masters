@@ -1,0 +1,86 @@
+<md-sidenav class="md-sidenav-left md-whiteframe-z2 md-locked-open md-closed"
+            md-component-id="left" md-is-locked-open="$mdMedia('gt-sm')"
+            tabindex="-1" aria-hidden="false">
+
+    <md-toolbar class="md-hue-2">
+        <h1 class="md-toolbar-tools">
+            <a ng-href="#/">
+                <span style="text-shadow:0px 0px rgb(198,40,40);">
+                    <md-icon md-font-icon="fs fs-b fs-3x"></md-icon>
+                </span>
+                Spiral Packing
+            </a>
+        </h1>
+    </md-toolbar>
+
+    <md-content flex role="navigation" ng-controller="SidenavCtrl">
+
+        <menu-link section="section" class="md-hue-1" md-no-ink>
+            <md-button class="md-raised md-hue-1" tabindex="0">
+                Parameters
+            </md-button>
+        </menu-link>
+
+        <form name="settingsForm" novalidate>
+            <md-input-container>
+                <label>Number of turns</label>
+                <input name="sweep" ng-model="sweep" ng-change="onChange()" required>
+                <div ng-messages="settingsForm.sweep.$error">
+                    <div ng-message="required">Required</div>
+                </div>
+            </md-input-container>
+
+            <md-input-container>
+                <label>Width per turn</label>
+                <input name="width" ng-model="width" ng-change="onChange()" required>
+                <div ng-messages="settingsForm.width.$error">
+                    <div ng-message="required">Required</div>
+                </div>
+            </md-input-container>
+
+            <md-switch ng-model="omega" ng-true-value="-1" ng-false-value="1" class="md-primary" ng-change="onChange()">
+                Clockwise
+            </md-switch>
+        </form>
+
+
+        <menu-link section="section" class="md-hue-1" md-no-ink>
+            <md-button class="md-raised md-hue-1" tabindex="0">
+                Behavior
+            </md-button>
+        </menu-link>
+
+        <form name="settingsForm" novalidate>
+            <md-checkbox ng-model="alternate" aria-label="alternate" class="md-primary" ng-change="onChange()">
+                Alternate orientation?
+            </md-checkbox>
+        </form>
+
+
+        <menu-link section="section" class="md-hue-1">
+            <md-button class="md-raised md-hue-1" tabindex="1" md-no-ink>
+                Colors / Effects
+            </md-button>
+        </menu-link>
+
+        <form novalidate>
+            <md-checkbox ng-model="gloss" aria-label="gloss" class="md-primary" ng-change="onChange()">
+                Gloss effect?
+            </md-checkbox>
+        </form>
+
+        <!-- <md-button ng-click="close()" class="md-primary">
+          Close Sidenav Right
+        </md-button> -->
+        <!-- <ul ng-show="isOpen()" class="menu-toggle-list" aria-hidden="false">
+            <li ng-repeat="page in section.pages" class="ng-scope">
+            <menu-link section="page" class="ng-isolate-scope">
+                <a class="md-button md-default-theme" ng-transclude="" ng-class="{'active' : isSelected()}" ng-href="#/demo/material.components.autocomplete" ng-click="focusSection()" tabindex="0" href="#/demo/material.components.autocomplete"><span class="ng-binding ng-scope">
+                Autocomplete
+            </span><!-- ngIf: isSelected() -->
+            <!-- <div class="md-ripple-container"></div></a>
+            </menu-link>
+            </li>
+        </ul> -->
+    </md-content>
+</md-sidenav>

@@ -1,168 +1,62 @@
-<div id="main" class="container-fluid" ng-controller="CanvasCtrl">
-    <div class="btn-toolbar" role="toolbar">
+<md-content class="md-toolbar-tools md-hue-1" layout="row" layout-align="end center">
+    <div layout="row" layout="center center">
+        <md-button class="md-icon-button md-mini md-accent md-hue-3" ng-disabled="isZoomOutDisabled()" ng-click="zoomOut()" aria-label="zoom out">
+            <md-icon md-font-icon="mdi mdi-lg mdi-remove-circle-outline"></md-icon>
+        </md-button>
+        <md-button md-no-ink class="md-icon-button md-mini md-primary">{{ 100 * zoom }}%</md-button>
+        <md-button class="md-icon-button md-mini md-accent md-hue-3" ng-disabled="isZoomInDisabled()" ng-click="zoomIn()" aria-label="zoom in">
+            <md-icon md-font-icon="mdi mdi-lg mdi-add-circle-outline"></md-icon>
+        </md-button>
+    </div>
 
-        <!-- Edit mode button -->
-        <div class="btn-group">
-            <a class="btn btn-default"
-               ng-class="{ 'btn-danger': drawing }"
-               ng-click="toggleDrawing()">
-                <span ng-if="!drawing">Begin Editing</span>
-                <span ng-if="drawing">Done Editing</span>
-            </a>
-        </div>
-
-        <!-- Seed button -->
-        <div class="btn-group" role="group">
-            <a class="btn btn-default compact"
-               ng-class="{ 'disabled': !drawing, 'btn-primary': seeding }"
-               ng-click="seed()" stop-event="click">
-                <i class="fa fa-fw fa-plus"></i>
-                <span class="compacted">Add seeds</span>
-            </a>
-        </div>
-
-        <!-- Option/action buttons -->
-        <div class="btn-group" role="group">
-
-            <!-- Branch spiral button -->
-            <a class="btn btn-default compact"
-               ng-class="{ 'disabled': !drawing || !selected, 'btn-primary': branching }"
-               ng-click="branch()" stop-event="click">
-                <i class="fa fa-fw fa-code-fork"></i>
-                <span class="compacted">Branch</span>
-            </a>
-
-            <!-- Edit spiral button -->
-            <a class="btn btn-default compact"
-               ng-class="{ 'disabled': !drawing || !selected }"
-               ng-click="edit()" stop-event="click">
-                <i class="fa fa-fw fa-paint-brush"></i>
-                <span class="compacted">Edit</span>
-            </a>
-
-            <!-- Delete spiral button -->
-            <a class="btn btn-default compact"
-               ng-class="{ 'disabled': !drawing || !selected }"
-               ng-click="delete()" stop-event="click">
-                <i class="fa fa-fw fa-trash"></i>
-                <span class="compacted">Delete</span>
-            </a>
-        </div>
-
+    <div layout="row" layout="end center">
         <!-- Image export -->
-        <div class="btn-group" role="group">
-            <a class="btn btn-default compact"
-               ng-class="{ 'disabled': drawing }"
-               ng-click="saveImage()" stop-event="click">
-                <i class="fa fa-fw fa-picture-o"></i>
-                <span class="compacted">Save Image</span>
-            </a>
+        <md-button class="md-icon-button md-mini md-hue-1 md-raised" ng-click="showExport($event)">
+            <md-icon md-font-icon="mdi mdi-lg mdi-save"></md-icon> Save Image
+        </md-button>
 
-            <a class="btn btn-default compact"
-               ng-click="settings()" stop-event="click">
-                <i class="fa fa-fw fa-cogs"></i>
-                <span class="compacted">Settings</span>
-            </a>
-        </div>
+        <!-- Add seeds button -->
+        <md-button class="md-icon-button md-mini md-hue-1 md-raised" ng-class="{ 'active md-primary md-hue-2': seeding }" ng-click="seed()">
+            <md-icon md-font-icon="mdi mdi-lg mdi-polymer"></md-icon> Add Seeds
+        </md-button>
+        <!-- <a class="btn btn-sm btn-default" ng-class="{ 'active btn-primary': seeding }" ng-click="seed()">
+            <i class="fa fa-fw fa-plus"></i>
+            <span class="compacted">Add Seeds</span>
+        </a> -->
 
         <!-- Debug button -->
-        <div class="btn-group pull-right" role="group">
-            <a class="btn btn-default compact"
-               ng-class="{ 'active btn-success': debug }"
-               ng-click="toggleDebug()" stop-event="click">
-                <i class="fa fa-fw fa-bug"></i>
-                <span class="compacted">Debug</span>
-            </a>
-        </div>
+        <md-button class="md-icon-button md-mini md-hue-1 md-raised" ng-class="{ 'active md-warn md-hue-2': debug }" ng-click="toggleDebug()">
+            <md-icon md-font-icon="mdi mdi-lg mdi-bug-report"></md-icon> Debug
+        </md-button>
     </div>
+</md-content>
 
-    <div id="canvas">
+<md-content class="md-hue-1" layout="column" flex>
+    <svg-canvas class="canvas flex md-whiteframe-z1" ng-class="{ editing: callback }" scale="{{ zoom }}" ng-click="canvasClick($event)">
+        <g ng-repeat="s in getSpirals() track by $index" data-target="menu-{{ $index }}" context-menu>
+            <svg-spiral sweep="s.sweep" width="s.width"
+                        theta="s.theta" omega="s.omega"
+                        cx="s.center.x" cy="s.center.y"
+                        colors="['#0000ff', '#0000ff', '#ffff00', '#ff0000']"
+                        stroke="white" stroke-width="1" gloss="hasGloss()">
+            </svg-spiral>
+        </g>
 
-        <!-- Notifications -->
-        <!-- <div class="alert alert-warning slide-down clearfix"
-             ng-show="hasNotification">
+        <!-- <svg-spiral sweep="3" width="40" cx="500" cy="250" colors="['#000000', '#fff']" stroke="black" stroke-width="10"></svg-spiral> -->
+    </svg-canvas>
 
-            <a class="close" ng-click="hideNotification()" stop-event="click">
-                ×
-            </a>
-
-            <div class="form-group" ng-if="drawing && !selected" >
-                <span ng-if="branching">
-                    Choose a spiral to <b>branch</b> from.
-                </span>
-
-                <span ng-if="editing">
-                    Choose a spiral to <b>edit</b>.
-                </span>
-
-                <span ng-switch-default>
-                    Click on one of the buttons to the right to
-                </span>
-            </div>
-
-            <div>
-                When you're finished editing, click the
-                <b>'Done Editing'</b> button to exit edit mode.
-            </div>
-        </div> -->
-
-
-        <!-- The actual 'canvas' -->
-        <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
-             ng-class="{ 'selectable': drawing && selecting }"
-             ng-click="click($event)"
-             stop-event="click">
-
-             <g ng-if="debug">
-                 <g ng-if="S">
-                     <path ng-attr-d="{{ S.getPath() }}" stroke="pink" fill="transparent"/>
-                     <circle ng-attr-r="{{S.width * (S.sweep - 1)}}" ng-attr-cx="{{S.center.x}}" ng-attr-cy="{{S.center.y}}"
-                             fill="transparent" stroke="black" stroke-dasharray="5,7"/>
-                 </g>
-
-                 <circle ng-if="bc0" ng-attr-r="{{bc0.radius+1}}" ng-attr-cx="{{bc0.center.x}}" ng-attr-cy="{{bc0.center.y}}" fill="transparent" stroke="blue" stroke-width="1" stroke-dasharray="5,7"/>
-                 <circle ng-if="bc1" ng-attr-r="{{bc1.radius+1}}" ng-attr-cx="{{bc1.center.x}}" ng-attr-cy="{{bc1.center.y}}" fill="transparent" stroke="red" stroke-width="1" stroke-dasharray="5,7"/>
-                 <circle ng-if="bc2" ng-attr-r="{{bc2.radius+1}}" ng-attr-cx="{{bc2.center.x}}" ng-attr-cy="{{bc2.center.y}}" fill="transparent" stroke="green" stroke-width="1" stroke-dasharray="5,7"/>
-                 <circle ng-if="bc3" ng-attr-r="{{bc3.radius+1}}" ng-attr-cx="{{bc3.center.x}}" ng-attr-cy="{{bc3.center.y}}" fill="transparent" stroke="orange" stroke-width="1" stroke-dasharray="5,7"/>
-
-                 <circle ng-if="rs2" ng-attr-r="{{rs2.radius}}" ng-attr-cx="{{rs2.center.x}}" ng-attr-cy="{{rs2.center.y}}" fill="transparent" stroke="green" />
-                 <circle ng-if="rs3" ng-attr-r="{{rs3.radius}}" ng-attr-cx="{{rs3.center.x}}" ng-attr-cy="{{rs3.center.y}}" fill="transparent" stroke="orange" />
-
-                 <circle ng-if="circles" ng-repeat="c in circles track by $index"
-                         ng-attr-r="{{c.radius}}" ng-attr-cx="{{c.center.x}}" ng-attr-cy="{{c.center.y}}"
-                         fill="transparent" ng-attr-stroke="{{ c.color || 'black' }}" stroke-dasharray="5, 7"/>
-
-                 <circle ng-if="points" ng-repeat="p in points track by $index"
-                         r="3" ng-attr-cx="{{p.x}}" ng-attr-cy="{{p.y}}" ng-attr-fill="{{ p.color || 'black' }}" ng-attr-stroke="{{ p.color || 'black' }}"/>
-             </g>
-
-            <!-- Spirals -->
-            <g class="spiral"
-               ng-repeat="s in getSpirals() track by $index"
-               ng-init="paths = s.getPaths(); inPaths = s.getInnerPaths()"
-               ng-class="{ 'selected': drawing && isSelected(s) }"
-               ng-click="select(s)"
-               stop-event="click">
-
-               <!-- The spiral paths -->
-               <path ng-repeat="p in paths track by $index"
-                     ng-attr-d="{{ p.toString() }}"
-                     stroke="black"
-                     stroke-width="1"/>
-
-               <path ng-repeat="p in inPaths track by $index"
-                     ng-attr-d="{{ p.toString() }}"
-                     ng-attr-stroke="{{ ['red', 'green', 'blue', 'yellow', 'orange'][$index % 5] }}"
-                     ng-attr-stroke-width="{{ s.width }}"/>
-               <!-- <path ng-attr-stroke-width="{{ s.width }}" ng-attr-d="{{ s.getPath() }}" stroke="red"/> -->
-
-               <text ng-if="debug"
-                     ng-attr-x="{{ s.center.x }}"
-                     ng-attr-y="{{ s.center.y }}"
-                     fill="black">
-                     {{ $index }}
-                </text>
-            </g>
-        </svg>
+    <div ng-repeat="s in getSpirals() track by $index" id="menu-{{ $index }}" class="context-menu dropdown">
+        <ul class="dropdown-menu" role="menu">
+            <li role="menuitem" tabindex="1">
+                <a ng-click="branch(s, $event)">
+                    <i class="fa fa-fw fa-code-fork"></i> Branch
+                </a>
+            </li>
+            <li role="menuitem" tabindex="2">
+                <a ng-click="delete(s, $event)">
+                    <i class="fa fa-fw fa-trash"></i> Delete
+                </a>
+            </li>
+        </ul>
     </div>
-</div>
+</md-content>

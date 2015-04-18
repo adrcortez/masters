@@ -119,6 +119,12 @@
                 clone = svg;
             }
 
+            if (el.getBoundingClientRect) {
+                var bbox = el.getBoundingClientRect();
+                width = bbox.width;
+                height = bbox.height;
+            }
+
             clone.setAttribute('version', '1.1');
             clone.setAttributeNS(xmlns, 'xmlns', 'http://www.w3.org/2000/svg');
             clone.setAttributeNS(xmlns, 'xmlns:xlink', 'http://www.w3.org/1999/xlink');
@@ -156,11 +162,17 @@
                 canvas.height = image.height;
 
                 var context = canvas.getContext('2d');
-                context.drawImage(image, 0, 0);
+                context.translate(0.5, 0.5);
+                context.imageSmoothingEnabled       = true
+                context.mozImageSmoothingEnabled    = true
+                context.oImageSmoothingEnabled      = true
+                context.webkitImageSmoothingEnabled = true
+
+                context.drawImage(image, 0, 0, image.width, image.height);
 
                 var a = document.createElement('a');
                 a.download = name;
-                a.href = canvas.toDataURL('image/png');
+                a.href = canvas.toDataURL('image/png', 1.0);
                 document.body.appendChild(a);
                 a.click();
             };

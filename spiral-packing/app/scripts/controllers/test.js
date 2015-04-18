@@ -87,7 +87,7 @@ angular.module('spiralApp')
             console.log('spirals');
 
             var s1 = new Spiral(4, 20, 0, 1, new Point2(200, 150)),
-                s2 = new Spiral(4, 20, PI/2, 1, new Point2(400, 200)),
+                s2 = new Spiral(4, 20, PI/6, 1, new Point2(400, 100)),
                 s3 = new Spiral(3, 30, 0, -1, new Point2(400, 300)),
                 s4 = new Spiral(4, 20, -PI/2, 1, new Point2(100, 400));
 
@@ -112,12 +112,6 @@ angular.module('spiralApp')
                 e2 = s3.getEdgePoint(s2.center.x, s2.center.y),
                 e3 = s2.getEdgePoint(s1.center.x, s1.center.y);
 
-            var j1 = s2.getOppositeEdgePoint(s3.center.x, s3.center.y),
-                j2 = s2.getOppositeEdgePoint(s1.center.x, s1.center.y);
-
-            j1.color = 'blue';
-            j2.color = 'red';
-
             var c1 = s1.getBoundingCircle(s2),
                 c2 = s1.getBoundingCircle(s3),
                 c3 = s2.getBoundingCircle(s3),
@@ -130,7 +124,7 @@ angular.module('spiralApp')
 
             $scope.output = {
                 spirals: [s4],
-                points: [e1, e2, e3, j1, j2 ],
+                points: [e1, e2, e3 ],
                 circles: [c1, c2, c3, c4 ]
             };
         };

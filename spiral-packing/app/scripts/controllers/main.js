@@ -9,7 +9,7 @@
  */
 angular.module('spiralApp')
 
-    .controller('MainCtrl', function ($scope, $modal) {
+    .controller('MainCtrl', function ($scope, $window, $modal) {
 
         // Image export
         $scope.saveImage = function () {
@@ -67,7 +67,7 @@ angular.module('spiralApp')
                         $settings.setTheta($scope.theta);
                         $settings.setOmega($scope.omega);
                         $settings.setAlternate($scope.alternate);
-                        
+
                         $modalInstance.close();
                     };
 
@@ -85,9 +85,33 @@ angular.module('spiralApp')
             });
         };
 
+
         // Debug
-        $scope.debug = true;
         $scope.toggleDebug = function () {
             $scope.debug = !$scope.debug;
         };
+
+
+        // Zoom functions
+        $scope.zoomIn = function () {
+            var zoom = $scope.zoom + 0.25;
+            $scope.zoom = Math.min(zoom, 2.0);
+        };
+
+        $scope.zoomOut = function () {
+            var zoom = $scope.zoom - 0.25;
+            $scope.zoom = Math.max(zoom, 0.5);
+        };
+
+        $scope.isZoomInDisabled = function () {
+            return $scope.zoom === 2.0;
+        };
+
+        $scope.isZoomOutDisabled = function () {
+            return $scope.zoom === 0.5;
+        };
+
+
+        $scope.zoom = 1;
+        $scope.debug = true;
     });

@@ -63,8 +63,7 @@ angular.module('spiralApp')
             },
 
             dy: function () {
-                // Inverse y coordinate system
-                return this.p0.y - this.p1.y;
+                return this.p1.y - this.p0.y;
             },
 
             slope: function () {
@@ -89,69 +88,42 @@ angular.module('spiralApp')
                 return px + py;
             },
 
+            normalize: function () {
+                var dx = this.dx(),
+                    dy = this.dy(),
+                    m = this.magnitude();
+
+                // Get the coordinates of the unit vector
+                var x = dx / m,
+                    y = dy / m;
+
+                // Return the normalized (unit) vector
+                return new Vector2(ORIGIN, new Point2(x, y));
+            },
+
             angle: function (v) {
-                var dp = this.dotProduct(v);
-                var m0 = this.magnitude();
-                var m1 = v.magnitude();
-                return Math.acos(dp / (m0 * m1)) || 0;
+
+                // Normalize the vectors
+                var v1 = this.normalize(),
+                    v2 = (v || UNIT_X).normalize();
+
+                // Calculate the angle between the normalized vectors
+                var dp = v1.dotProduct(v2),
+                    m0 = v1.magnitude(),
+                    m1 = v2.magnitude(),
+                    angle = Math.acos(dp / (m0 * m1)) || 0;
+
+                // Inverse coordinate system, if y2 is greater
+                // than y1 it is actually below y1, so the angle
+                // would be positive (clockwise)
+                return (v2.p1.y >= v1.p1.y) ? angle : -angle;
             }
         };
 
+        var ORIGIN = new Point2(0, 0),
+            UNIT_X = new Vector2(ORIGIN, new Point2(1, 0)),
+            UNIT_Y = new Vector2(ORIGIN, new Point2(0, 1));
 
         // Return constructor
         return Vector2;
-    })
-
-
-    .factory('Path', function () {
-
-        // Define the constructor.
-        function Path () {
-            this.points = [];
-            this.color = null;
-        }
-
-
-        // Instance methods
-        Path.prototype = {
-
-            addPoint: function (p) {
-                this.points.push(p);
-            },
-
-            getColor: function () {
-                return this.color;
-            },
-
-            setColor: function (c) {
-                this.color = c || null;
-            },
-
-            toString: function () {
-
-                // Return an empty path if no points
-                if (this.points.length === 0) {
-                    return '';
-                }
-
-                // Build the path string
-                var str = 'M';
-                for (var i = 0; i < this.points.length; i++) {
-                    var p = this.points[i];
-                    str += p.x + ' ' + p.y + ' ';
-                }
-
-                // Ensure an even number of points
-                if (this.points.length % 2 === 1) {
-                    var p = this.points[this.points.length - 1];
-                    str += p.x + ' ' + p.y;
-                }
-
-                return str;
-            }
-        };
-
-
-        // Return constructor
-        return Path;
     });

@@ -11,8 +11,12 @@
 angular.module('spiralApp')
     .controller('CanvasCtrl', function (
         $scope, $filter, $mouse, $modal, $settings, $spirals,
-        epsilon, Gradient, Point2, Vector2, Circle, Spiral) {
+        epsilon, Color, Gradient, Point2, Vector2, Circle, Spiral) {
 
+
+        $scope.nm = function (t) {
+
+        };
 
         function weirdFit (S, S1, S2) {
 
@@ -231,7 +235,14 @@ angular.module('spiralApp')
                 omega = $settings.getOmega();
 
             // Generate the seed spirals
-            $spirals.seed(sweep, width, theta, omega, x, y);
+            var spirals = $spirals.seed(sweep, width, theta, omega, x, y);
+
+            // Set the fill/stroke for each seed spiral
+            angular.forEach(spirals, function (spiral) {
+                spiral.setFill($scope.fill);
+                spiral.setStroke($scope.stroke);
+                spiral.setStrokeWidth($scope.strokeWidth);
+            });
         }
 
         function branchCallback (x, y) {
@@ -256,10 +267,16 @@ angular.module('spiralApp')
             if (spiral && spiral.width > 0.05) {
 
                 spiral.index = $spirals.size();
+
+                // Set the fill/stroke for the spiral
+                spiral.setFill($scope.fill);
+                spiral.setStroke($scope.stroke);
+                spiral.setStrokeWidth($scope.strokeWidth);
+
                 $spirals.add(spiral);
 
-                // spiral.parent = SP;
-                // SP.children.push(spiral);
+                spiral.parent = SP;
+                SP.children.push(spiral);
             }
         }
 
@@ -352,7 +369,38 @@ angular.module('spiralApp')
 
         $scope.getSpirals = function () {
             return $spirals.get();
-        }
+        };
+
+
+        // Zoom functions
+        $scope.zoomIn = function () {
+            var zoom = $scope.zoom + 0.25;
+            $scope.zoom = Math.min(zoom, 2.0);
+        };
+
+        $scope.zoomOut = function () {
+            var zoom = $scope.zoom - 0.25;
+            $scope.zoom = Math.max(zoom, 0.5);
+        };
+
+        $scope.isZoomInDisabled = function () {
+            return $scope.zoom === 2.0;
+        };
+
+        $scope.isZoomOutDisabled = function () {
+            return $scope.zoom === 0.5;
+        };
+
+
+        // Listen for when the canvas is resized so that the
+        // view box can be adjusted appropriately.
+        $scope.resize = function ($event) {
+            console.log($event);
+            console.log($event.width + ', ' + $event.height);
+            $scope.width = $event.width;
+            $scope.height = $event.height;
+        };
+
 
         $scope.$watch('drawing', function () {
             $scope.seeding = false;
@@ -389,6 +437,15 @@ angular.module('spiralApp')
         });
 
 
-        $scope.g = new Gradient('red', 'blue');
+        // $scope.fill = new Gradient('red', 'blue');
+        $scope.stroke = new Color('black');
+        $scope.strokeWidth = 1;
+
+
+        // Initialzation
+        $scope.zoom = 1.0;
+        $scope.width = 0;
+        $scope.height = 0;
+
         console.log('CanvasCtrl');
     });

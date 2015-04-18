@@ -2,16 +2,34 @@
 
 angular.module('spiralApp')
 
-    .factory('Circle', function (epsilon, Point2, Vector2) {
+    .factory('Circle', function (epsilon, Shape, Point2, Vector2) {
 
         // Define the constructor
         function Circle (radius, center) {
+
+            // Call the parent constructor
+            Shape.call(this);
+
             this.radius = Math.abs(radius || 0);
             this.center = Point2.copy(center);
-            this.color = null;
         }
 
-        Circle.prototype = {
+
+        // Extend the parent
+        Circle.prototype = Object.create(Shape.prototype);
+        Circle.prototype.constructor = Circle;
+
+
+        // Add the instance methods
+        angular.extend(Circle.prototype, {
+
+            clone: function () {
+                return new Circle(this.radius, this.center);
+            },
+
+            toString: function () {
+                return this.center.toString() + ' ' + this.radius;
+            },
 
             intersects: function (c) {
 
@@ -36,17 +54,12 @@ angular.module('spiralApp')
                     u = new Point2(x, y),
                     v1 = new Vector2(this.center, v),
                     v2 = new Vector2(this.center, u),
-                    angle = v1.angle(v2),
-                    angle = (y >= y0) ? angle : -angle;
+                    angle = v1.angle(v2);
 
                 var X = x0 + r*Math.cos(angle),
                     Y = y0 + r*Math.sin(angle);
 
                 return new Point2(X, Y);
-            },
-
-            toString: function () {
-                return this.center.toString() + ' ' + this.radius;
             },
 
             fit: function (c1, c2, c3) {
@@ -160,16 +173,9 @@ angular.module('spiralApp')
 
                 // Return the fitted circle or this circle if no other
                 // circles were specified
-                var circle = new Circle(r, s);
-                circle.color = this.color;
-                return circle;
+                return new Circle(r, s);
             }
-        };
-
-
-        Circle.copy = function (c) {
-            return c ? new Circle(c.radius, c.center) : null;
-        };
+        });
 
 
         // Return constructor
