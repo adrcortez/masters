@@ -1,14 +1,13 @@
 \begin{thebibliography}{1}
 
+\bibitem{Bourke2006}
+Paul Bourke.
+\newblock An introduction to the apollony fractal.
+\newblock {\em Computers and Graphics}, 30(1):134--136, January 2006.
+
 \bibitem{Browne2006834}
 Cameron Browne and Paul van Wamelen.
 \newblock Spiral packing.
-\newblock {\em Computers \& Graphics}, 30(5):834 -- 842, 2006.
-
-\bibitem{Kasner1943}
-Edward Kasner and Fred Supnick.
-\newblock The apollonian packing of circles.
-\newblock {\em Proceedings of the National Academy of Sciences of the United
-  States of America}, 29(11):378 -- 384, 1943.
+\newblock {\em Computers and Graphics}, 30(5):834 -- 842, 2006.
 
 \end{thebibliography}

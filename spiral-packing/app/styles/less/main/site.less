@@ -1,63 +1,43 @@
-legend {
-    color: inherit;
+
+:focus {outline:none;}
+::-moz-focus-inner {border:0;}
+
+.md-toolbar-tools {
+    font-size: 1.2rem;
 }
 
-.modal-backdrop {
-    bottom: 0;
-}
+.md-chips {
+    font-size: 1.2rem;
 
-#main {
-    position: relative;
-    height:100%;
-}
-
-input.form-control:focus {
-    color: #333;
-}
-
-.context-menu {
-    position: fixed;
-
-    .dropdown-menu {
-        min-width: 120px;
-        width: auto;
-        padding: 0;
-        margin-left: 2px;
-        border: 1px solid #e6e6e6
+    .md-contact-avatar img {
+        border: 3px solid transparent;
     }
 
-    li {
-        border-bottom: 1px solid #e6e6e6;
-        border-radius: 0px;
-        border: none;
-        outline: none;
-        cursor: pointer;
+    .md-chip {
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+        text-transform: lowercase;
 
-        a {
-          border-radius: 0px;
-          border: none;
-          outline: none;
-          cursor: pointer;
-          padding: 0.5em 1em;
-          border-radius: in
+        &.md-mini {
+            font-size: 0.8em;
         }
 
-        &:hover a {
-            background: #2196f3;
-            color: #ffffff;
-        }
+        .md-chip-remove {
+            opacity: 0.3;
+            width: 2.5rem;
 
-        &:first-child,
-        &:first-child a {
-            border-top-left-radius: inherit;
-            border-top-right-radius: inherit;
-        }
+            &:hover {
+                opacity: 1;
+            }
 
-        &:last-child,
-        &:last-child a {
-            border-bottom-left-radius: inherit;
-            border-bottom-right-radius: inherit;
+            md-icon {
+                width: 1.4rem;
+                height: 1.4rem;
+            }
         }
+    }
+
+    .md-chip-input-container {
+        display: none;
     }
 }
 
@@ -69,12 +49,14 @@ md-icon {
 
 .md-button {
     padding: 0 1.0rem;
+    vertical-align: middle;
 
-    &.md-icon-button.md-mini {
+    &.md-mini {
         height: 3.2rem;
         width: auto;
         line-height: 3.2rem;
         padding: 0 0.8rem;
+        font-size: 1.2rem;
     }
 
     &.disabled,
@@ -87,26 +69,63 @@ md-sidenav {
     min-width: 0 !important;
     width: auto !important;
 
-    md-content.md-default-theme {
-        background-color: #f6f6f6;
+    md-content {
 
-        menu-link {
+        menu-link,
+        menu-toggle {
+            position: relative;
+            display: block;
             border-top: 1px solid rgba(0, 0, 0, 0.12);
 
-            .md-button {
+            .md-button.menu-header {
                 border-radius: 0 !important;
-                color: inherit;
-                cursor: pointer;
-                display: block;
-                line-height: 40px;
                 margin: 0;
-                max-height: 40px;
-                overflow: hidden;
-                padding: 0px 16px;
                 text-align: left;
-                text-decoration: none;
-                white-space: normal;
                 width: 100%;
+            }
+
+            menu-section {
+                display: block !important;
+                overflow: hidden;
+            }
+        }
+
+        menu-toggle {
+
+            .menu-header:after {
+                content: "\f29e";
+                font: normal normal normal 14px/1 'Material Design Iconic Font';
+                font-size: 1.5em;
+                vertical-align: middle;
+                position: absolute;
+                top: 50%;
+                right: 0;
+                margin: 0 16px;
+                margin-top: -0.5em;
+                cursor: pointer;
+            }
+
+            menu-section {
+                max-height: 2000px;
+                -webkit-transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
+                -moz-transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
+                transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
+                -webkit-transition-property: max-height;
+                -moz-transition-property: max-height;
+                transition-property: max-height;
+
+                &.ng-hide {
+                    max-height: 0px;
+                    -webkit-transition: 0.5s cubic-bezier(0.35, 0, 0.25, 1);
+                    -moz-transition: 0.5s cubic-bezier(0.35, 0, 0.25, 1);
+                    transition: 0.5s cubic-bezier(0.35, 0, 0.25, 1);
+                }
+            }
+
+            &.open {
+                .menu-header:after {
+                    content: "\f29d";
+                }
             }
         }
     }

@@ -18,6 +18,7 @@ angular
             var xmlns = 'http://www.w3.org/2000/xmlns/';
 
 			var shapes = [];
+			var boundaryShape = null;
 
 
             function getContext (canvas) {
@@ -83,7 +84,6 @@ angular
 		        return css;
 		    }
 
-
             function toDataUri (element, options) {
 
 				// Coerce the element into a DOM node
@@ -127,8 +127,33 @@ angular
 					base64 = $base64.encode(unescaped);
 
                 return 'data:image/svg+xml;base64,' + base64;
-            };
+            }
 
+			function convertToContext (element, options, callback) {
+
+				// Get the image data
+                var uri = toDataUri(element, options),
+                    image = new Image();
+
+                // Convert the image data into a canvas object when loaded
+                image.onload = function () {
+
+                    // Create the canvas
+                    var canvas = document.createElement('canvas');
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+
+                    // Draw the image to the canvas context
+                    var ctx = getContext(canvas);
+                    ctx.drawImage(image, 0, 0);
+
+					// Execute the callback, if any
+					callback && callback(canvas, ctx);
+                };
+
+                // Set the image src to trigger the load event
+                image.src = uri;
+			}
 
             this.export = function (element, options) {
 
@@ -142,48 +167,50 @@ angular
                 options.quality = options.quality || 1.0;
                 options.scale = options.scale || 1.0;
 
-                // Get the image data
-                var uri = toDataUri(element, options),
-                    image = new Image();
+				// Convert the svg element to a canvas context and
+				// trigger the export when it's complete
+				convertToContext(element, options, function (canvas) {
 
-                // Export the image when the image has loaded
-                image.onload = function () {
+					// Generate the download link
+					var a = $document[0].createElement('a');
+					a.download = options.filename + '.' + options.type;
+					a.href = canvas.toDataURL(
+						'image/' + options.type, options.quality);
 
-                    var width = image.width / options.scale,
-                        height = image.height / options.scale;
-
-                    // Create the canvas
-                    var canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-
-                    // Draw the image to the canvas context
-                    var ctx = getContext(canvas);
-                    ctx.drawImage(image, 0, 0);
-
-                    // Generate the download link
-                    var a = $document[0].createElement('a');
-                    a.download = options.filename + '.' + options.type;
-                    a.href = canvas.toDataURL(
-                        'image/' + options.type, options.quality);
-
-
-                    // Click the download link
-                    $document[0].body.appendChild(a);
-                    a.click();
-                };
-
-                // Set the image src
-                image.src = uri;
+					// Click the download link
+					$document[0].body.appendChild(a);
+					a.click();
+				});
             };
 
+			this.getPixelColor = function (element, x, y, callback) {
+
+				// Convert the svg element to a canvas context and
+				// get the color at the specified location when complete
+				convertToContext(element, null, function (canvas, ctx) {
+					var pixel = ctx.getImageData(x, y, 1, 1);
+					callback && callback(pixel.data);
+				});
+			};
 
 			this.addShape = function (shape) {
-				shapes.push(shape);
+				shape && shapes.push(shape);
+			};
+
+			this.unshiftShape = function (shape) {
+				shape && shapes.unshift(shape);
 			};
 
 			this.getShapes = function () {
 				return shapes;
+			};
+
+			this.getBoundaryShape = function () {
+				return boundaryShape;
+			};
+
+			this.setBoundaryShape = function (value) {
+				boundaryShape = value;
 			};
         }
     ]);

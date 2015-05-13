@@ -13,12 +13,10 @@
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
         <!-- build:css(.) styles/vendor.css -->
         <!-- bower:css -->
-        <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
-        <link rel="stylesheet" href="bower_components/angular-ui-select/dist/select.css" />
-        <link rel="stylesheet" href="bower_components/spectrum/spectrum.css" />
         <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
         <!-- endbower -->
 
+        <link rel="stylesheet" href="styles/icomoon.css">
         <link rel="stylesheet" href="styles/fluid-spiral.css">
         <link rel="stylesheet" href="styles/material-design.css">
         <!-- endbuild -->
@@ -58,7 +56,7 @@
 
         <!-- build:js(.) scripts/vendor.js -->
             <!-- bower:js -->
-            <script src="bower_components/jquery/dist/jquery.js"></script>
+            <script src="bower_components/jQuery/dist/jquery.js"></script>
             <script src="bower_components/angular/angular.js"></script>
             <script src="bower_components/angular-animate/angular-animate.js"></script>
             <script src="bower_components/angular-cookies/angular-cookies.js"></script>
@@ -66,13 +64,9 @@
             <script src="bower_components/angular-route/angular-route.js"></script>
             <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
             <script src="bower_components/angular-touch/angular-touch.js"></script>
-            <script src="bower_components/angular-ui-select/dist/select.js"></script>
-            <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
             <script src="bower_components/lodash/lodash.js"></script>
             <script src="bower_components/tinycolor/tinycolor.js"></script>
             <script src="bower_components/ng-resize/ngresize.js"></script>
-            <script src="bower_components/spectrum/spectrum.js"></script>
-            <script src="bower_components/angular-spectrum-colorpicker/dist/angular-spectrum-colorpicker.min.js"></script>
             <script src="bower_components/angular-base64/angular-base64.js"></script>
             <script src="bower_components/ng-context-menu/dist/ng-context-menu.js"></script>
             <script src="bower_components/fabric/dist/fabric.min.js"></script>
@@ -80,6 +74,7 @@
             <script src="bower_components/angular-aria/angular-aria.js"></script>
             <script src="bower_components/angular-material/angular-material.js"></script>
             <script src="bower_components/angular-messages/angular-messages.js"></script>
+            <script src="bower_components/angular-recursion/angular-recursion.js"></script>
             <!-- endbower -->
         <!-- endbuild -->
 
@@ -87,7 +82,14 @@
 
             <!-- Math component -->
             <script src="scripts/math/factories.js"></script>
+            <script src="scripts/math/services.js"></script>
             <script src="scripts/math/module.js"></script>
+
+            <!-- Colorpicker component -->
+            <script src="scripts/colorpicker/constants.js"></script>
+            <script src="scripts/colorpicker/templates.js"></script>
+            <script src="scripts/colorpicker/directives.js"></script>
+            <script src="scripts/colorpicker/module.js"></script>
 
             <!-- SVG component -->
             <script src="scripts/svg/factories.js"></script>
@@ -96,9 +98,10 @@
             <script src="scripts/svg/module.js"></script>
 
             <!-- Main component -->
+            <script src="scripts/main/filters.js"></script>
             <script src="scripts/main/services.js"></script>
             <script src="scripts/main/controllers.js"></script>
-            <script src="scripts/main/module.js"></script>
+            <script src="scripts/app.js"></script>
 
             <!-- <script src="scripts/app.js"></script>
             <script src="scripts/factories/color.js"></script>-->

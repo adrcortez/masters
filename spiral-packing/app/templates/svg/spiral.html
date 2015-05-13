@@ -1,7 +1,25 @@
-<g class="spiral" fill="none">
+<g class="shape spiral" fill="transparent">
+
+    <!-- Spiral outer stroke -->
+    <g>
+        <g ng-repeat="s in outerSegments track by $index"
+           ng-init="p0 = s[0]; c1 = s[1]; p1 = s[2];"
+           ng-attr-stroke-width="{{ 1 * strokeWidth }}">
+            <path ng-attr-d="M {{ p0.x }} {{ p0.y }}
+                             Q {{ c1.x }} {{ c1.y }}
+                               {{ p1.x }} {{ p1.y }}" />
+        </g>
+    </g>
+
+    <g ng-if="children.length">
+        <svg-spiral ng-repeat="s in children track by $index"
+                    spiral="s"
+                    stroke="black" stroke-width="1">
+        </svg-spiral>
+    </g>
 
     <!-- Spiral fill/gloss -->
-    <g stroke="none" stroke-width="0">
+    <g stroke="none" stroke-width="0" ng-if="colors.length">
         <g ng-repeat="s in segments track by $index"
            ng-init="p0 = s[0]; c1 = s[1]; p1 = s[2];
                     p2 = s[3]; c2 = s[4]; p3 = s[5];
@@ -43,7 +61,7 @@
             </g>
 
             <!-- Gloss -->
-            <g opacity="0.2" ng-attr-fill="url(#gloss{{ id }})" ng-if="gloss">
+            <g opacity="0.3" ng-attr-fill="url(#gloss{{ id }})" ng-if="!isFlat">
                <path ng-attr-d="M {{ p0.x }} {{ p0.y }}
                                 Q {{ c1.x }} {{ c1.y }}
                                   {{ p1.x }} {{ p1.y }}
@@ -54,13 +72,16 @@
         </g>
     </g>
 
-    <!-- Spiral stroke -->
+    <!-- Spiral inner stroke -->
     <g>
-        <g ng-repeat="s in segments track by $index"
-           ng-init="p0 = s[0]; c1 = s[1]; p1 = s[2];">
+        <g ng-repeat="s in innerSegments track by $index"
+           ng-init="p0 = s[0]; c1 = s[1]; p1 = s[2];"
+           ng-attr-stroke-width="{{ 0.5 * strokeWidth }}">
             <path ng-attr-d="M {{ p0.x }} {{ p0.y }}
                              Q {{ c1.x }} {{ c1.y }}
                                {{ p1.x }} {{ p1.y }}" />
         </g>
     </g>
+
+    <text ng-attr-x="{{ cx }}" ng-attr-y="{{ cy }}" fill="black">{{ index }}</text>
 </g>
