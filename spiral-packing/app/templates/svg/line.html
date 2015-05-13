@@ -1,0 +1,11 @@
+<g class="shape line">
+
+    <path ng-if="control"
+          ng-attr-d="M {{ start.x }} {{ start.y }}
+                     Q {{ control.x }} {{ control.y }}
+                       {{ end.x }} {{ end.y }}" />
+
+    <path ng-if="!control"
+          ng-attr-d="M {{ start.x }} {{ start.y }}
+                     L {{ end.x }} {{ end.y }}" />
+</g>

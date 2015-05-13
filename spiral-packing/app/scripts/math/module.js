@@ -2,5 +2,6 @@
 
 
 angular.module('math', [
-    'math.factories'
+    'math.factories',
+    'math.services'
 ]);

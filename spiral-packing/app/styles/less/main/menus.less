@@ -1,0 +1,35 @@
+.context-menu {
+    position: fixed;
+    opacity: 0;
+    width: 0;
+    border-radius: 3px;
+
+    &.open {
+        opacity: 1;
+        width: 120px;
+        transition: opacity 0.2s cubic-bezier(0.55, 0, 0.55, 0.2);
+        transition-duration: 200ms;
+        transition-delay: 100ms;
+    }
+
+    .md-button {
+        border-radius: 0;
+        margin: 0;
+        text-align: left;
+
+        &:hover {
+            color: rgba(255,255,255,0.87);
+            background-color: rgb(40,53,147);
+        }
+
+        &:first-child {
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
+        }
+
+        &:last-child {
+            border-bottom-left-radius: 3px;
+            border-bottom-right-radius: 3px;
+        }
+    }
+}

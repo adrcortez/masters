@@ -1,5 +1,22 @@
-<md-content class="md-toolbar-tools md-hue-1" layout="row" layout-align="end center">
-    <div layout="row" layout="center center">
+<md-content class="md-hue-1" layout="row" layout-align="space-between center">
+    <div layout="row" layout="center center" layout-padding>
+        <!-- Image export -->
+        <md-button class="md-icon-button md-mini md-hue-1 md-raised" ng-click="showExport($event)">
+            <md-icon md-font-icon="mdi mdi-lg mdi-save"></md-icon> Save Image
+        </md-button>
+
+        <!-- Add seeds button -->
+        <md-button class="md-icon-button md-mini md-hue-1 md-raised" ng-class="{ 'active md-primary md-hue-2': seeding }" ng-click="toggleSeeding()">
+            <md-icon md-font-icon="mdi mdi-lg mdi-add-circle"></md-icon> Add Seeds
+        </md-button>
+
+        <!-- Grid -->
+        <!-- <md-button class="md-icon-button md-mini md-hue-1 md-raised" ng-class="{ 'active md-primary md-hue-2': grid }" ng-click="toggleGrid()">
+            <span ng-hide="grid"><md-icon md-font-icon="mdi mdi-lg mdi-grid-on"></md-icon> Show Grid</span>
+            <span ng-show="grid"><md-icon md-font-icon="mdi mdi-lg mdi-grid-off"></md-icon> Hide Grid</span>
+        </md-button> -->
+
+        <!-- Zoom zoom -->
         <md-button class="md-icon-button md-mini md-accent md-hue-3" ng-disabled="isZoomOutDisabled()" ng-click="zoomOut()" aria-label="zoom out">
             <md-icon md-font-icon="mdi mdi-lg mdi-remove-circle-outline"></md-icon>
         </md-button>
@@ -9,54 +26,100 @@
         </md-button>
     </div>
 
-    <div layout="row" layout="end center">
-        <!-- Image export -->
-        <md-button class="md-icon-button md-mini md-hue-1 md-raised" ng-click="showExport($event)">
-            <md-icon md-font-icon="mdi mdi-lg mdi-save"></md-icon> Save Image
-        </md-button>
-
-        <!-- Add seeds button -->
-        <md-button class="md-icon-button md-mini md-hue-1 md-raised" ng-class="{ 'active md-primary md-hue-2': seeding }" ng-click="seed()">
-            <md-icon md-font-icon="mdi mdi-lg mdi-polymer"></md-icon> Add Seeds
-        </md-button>
-        <!-- <a class="btn btn-sm btn-default" ng-class="{ 'active btn-primary': seeding }" ng-click="seed()">
-            <i class="fa fa-fw fa-plus"></i>
-            <span class="compacted">Add Seeds</span>
-        </a> -->
-
+    <div layout="row" layout="end center" layout-padding>
         <!-- Debug button -->
         <md-button class="md-icon-button md-mini md-hue-1 md-raised" ng-class="{ 'active md-warn md-hue-2': debug }" ng-click="toggleDebug()">
+            <md-tooltip>Debug</md-tooltip>
             <md-icon md-font-icon="mdi mdi-lg mdi-bug-report"></md-icon> Debug
         </md-button>
     </div>
 </md-content>
 
-<md-content class="md-hue-1" layout="column" flex>
-    <svg-canvas class="canvas flex md-whiteframe-z1" ng-class="{ editing: callback }" scale="{{ zoom }}" ng-click="canvasClick($event)">
-        <g ng-repeat="s in getSpirals() track by $index" data-target="menu-{{ $index }}" context-menu>
-            <svg-spiral sweep="s.sweep" width="s.width"
-                        theta="s.theta" omega="s.omega"
-                        cx="s.center.x" cy="s.center.y"
-                        colors="['#0000ff', '#0000ff', '#ffff00', '#ff0000']"
-                        stroke="white" stroke-width="1" gloss="hasGloss()">
-            </svg-spiral>
+<md-content class="md-hue-1" layout="column" layout-padding flex>
+    <svg-canvas id="canvas" class="canvas flex md-whiteframe-z1" ng-class="{ editing: callback }" scale="{{ zoom }}"
+                ng-click="canvasClick($event)">
+                <!-- ng-mousemove="canvasHover($event)"> -->
+
+        <!-- <defs>
+            <pattern id="smallGrid" width="8" height="8" patternUnits="userSpaceOnUse">
+                <path d="M 8 0 L 0 0 0 8" fill="none" stroke="gray" stroke-width="0.5"/>
+            </pattern>
+            <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse" >
+                <rect width="80" height="80" fill="url(#smallGrid)" opacity="0.5"/>
+                <path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1"/>
+            </pattern>
+        </defs> -->
+
+        <!-- Boundary shape -->
+        <g stroke="black" stroke-width="2" fill="none" ng-repeat="l in getBoundaryLines()">
+            <svg-line start="l.start" end="l.end" control="l.control" />
+            <!-- <path ng-attr-d="{{ getBoundary() }}" /> -->
         </g>
 
-        <!-- <svg-spiral sweep="3" width="40" cx="500" cy="250" colors="['#000000', '#fff']" stroke="black" stroke-width="10"></svg-spiral> -->
+
+        <!-- Spirals -->
+        <g ng-repeat="s in getSpirals() | filter:{ isSeed: true } track by $index">
+
+           <svg-spiral spiral="s" stroke="black" stroke-width="1" flat="isFlat()" ></svg-spiral>
+            <!-- <path ng-repeat="x in segments track by $index"
+                  ng-attr-d="{{ x.getPath() }}" /> -->
+        </g>
+
+        <!-- Grid lines -->
+        <!-- <rect ng-if="grid"
+              ng-attr-width="{{ 100 / zoom }}%"
+              ng-attr-height="{{ 100 / zoom }}%"
+              fill="url(#grid)"
+              opacity=".3"/> -->
+
+        <!-- Borders around the spirals -->
+        <g fill="none" stroke="none" stroke-width="1" stroke-dasharray="5,5">
+            <g ng-repeat="s in getSpirals()"
+               ng-init="cx = s.center.x; cy = s.center.y; r = s.sweep * s.width;"
+               context-menu data-target="menu-{{ $index }}">
+
+                <rect class="border" ng-if="!callback"
+                      ng-attr-x="{{ cx - r }}" ng-attr-y="{{ cy - r }}"
+                      ng-attr-width="{{ 2 * r }}" ng-attr-height="{{ 2 * r }}"
+                      rx="4" ry="4" />
+            </g>
+        </g>
+
+        <g ng-if="debug">
+
+            <g ng-if="BD">
+                <circle ng-repeat="d in BD" ng-attr-cx="{{ d.x }}" ng-attr-cy="{{ d.y }}" ng-attr-r="{{ d.r }}" stroke="green" fill="none" stroke-dasharray="5,5"/>
+                <circle ng-repeat="d in BD" ng-attr-cx="{{ d.x }}" ng-attr-cy="{{ d.y }}" r="2" fill="green" />
+            </g>
+
+            <circle ng-if="S" ng-attr-cx="{{ S.x }}" ng-attr-cy="{{ S.y }}" r="2" fill="red" />
+        </g>
     </svg-canvas>
 
-    <div ng-repeat="s in getSpirals() track by $index" id="menu-{{ $index }}" class="context-menu dropdown">
-        <ul class="dropdown-menu" role="menu">
-            <li role="menuitem" tabindex="1">
-                <a ng-click="branch(s, $event)">
-                    <i class="fa fa-fw fa-code-fork"></i> Branch
-                </a>
-            </li>
-            <li role="menuitem" tabindex="2">
-                <a ng-click="delete(s, $event)">
-                    <i class="fa fa-fw fa-trash"></i> Delete
-                </a>
-            </li>
-        </ul>
+    <md-content ng-repeat="s in getSpirals() track by $index" id="menu-{{ $index }}" class="context-menu md-whiteframe-z1" layout="column">
+        <md-button class="md-icon-button md-mini" ng-click="branch(s, $event)">
+            <md-icon md-font-icon="mdi mdi-call-split"></md-icon>
+            Branch
+        </md-button>
+        <md-divider></md-divider>
+        <md-button class="md-icon-button md-mini" ng-click="delete(s, $event)">
+            <md-icon md-font-icon="mdi mdi-delete"></md-icon>
+            Delete
+        </md-button>
+    </md-content>
+
+            <!-- <ul class="dropdown-menu" role="menu">
+                <li role="menuitem" tabindex="1">
+                    <a ng-click="branch(s, $event)">
+                        <i class="fa fa-fw fa-code-fork"></i> Branch
+                    </a>
+                </li>
+                <li role="menuitem" tabindex="2">
+                    <a ng-click="delete(s, $event)">
+                        <i class="fa fa-fw fa-trash"></i> Delete
+                    </a>
+                </li>
+            </ul> -->
+        </md-content>
     </div>
 </md-content>

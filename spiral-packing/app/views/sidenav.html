@@ -3,71 +3,154 @@
             tabindex="-1" aria-hidden="false">
 
     <md-toolbar class="md-hue-2">
-        <h1 class="md-toolbar-tools">
-            <a ng-href="#/">
-                <span style="text-shadow:0px 0px rgb(198,40,40);">
+        <div class="md-toolbar-tools">
+            <h1 class="md-headline">
+                <a ng-href="#/">
                     <md-icon md-font-icon="fs fs-b fs-3x"></md-icon>
-                </span>
-                Spiral Packing
-            </a>
-        </h1>
+                    Spiral Packing
+                </a>
+            </h1>
+        </div>
     </md-toolbar>
 
-    <md-content flex role="navigation" ng-controller="SidenavCtrl">
 
-        <menu-link section="section" class="md-hue-1" md-no-ink>
-            <md-button class="md-raised md-hue-1" tabindex="0">
+    <md-content role="navigation" ng-controller="SidenavCtrl">
+
+        <menu-toggle class="md-hue-1" tabindex="0" ng-class="{ open: expand0 }">
+            <md-button class="menu-header md-hue-1" ng-click="expand0 = !expand0">
                 Parameters
             </md-button>
-        </menu-link>
 
-        <form name="settingsForm" novalidate>
-            <md-input-container>
-                <label>Number of turns</label>
-                <input name="sweep" ng-model="sweep" ng-change="onChange()" required>
-                <div ng-messages="settingsForm.sweep.$error">
-                    <div ng-message="required">Required</div>
-                </div>
-            </md-input-container>
+            <menu-section ng-show="expand0" class="md-hue-1" layout-padding>
+                <form name="settingsForm" novalidate>
+                    <md-input-container>
+                        <label>Number of turns</label>
+                        <input name="sweep" ng-model="sweep" ng-change="onChange()" required>
+                        <div ng-messages="settingsForm.sweep.$error">
+                            <div ng-message="required">Required</div>
+                        </div>
+                    </md-input-container>
 
-            <md-input-container>
-                <label>Width per turn</label>
-                <input name="width" ng-model="width" ng-change="onChange()" required>
-                <div ng-messages="settingsForm.width.$error">
-                    <div ng-message="required">Required</div>
-                </div>
-            </md-input-container>
+                    <md-input-container>
+                        <label>Width per turn</label>
+                        <input name="width" ng-model="width" ng-change="onChange()" required>
+                        <div ng-messages="settingsForm.width.$error">
+                            <div ng-message="required">Required</div>
+                        </div>
+                    </md-input-container>
 
-            <md-switch ng-model="omega" ng-true-value="-1" ng-false-value="1" class="md-primary" ng-change="onChange()">
-                Clockwise
-            </md-switch>
-        </form>
+                    <md-switch ng-model="omega" ng-true-value="-1" ng-false-value="1" class="md-primary" ng-change="onChange()">
+                        Clockwise
+                    </md-switch>
+                </form>
+            </menu-section>
+        </menu-toggle>
 
-
-        <menu-link section="section" class="md-hue-1" md-no-ink>
-            <md-button class="md-raised md-hue-1" tabindex="0">
-                Behavior
+        <menu-toggle class="md-hue-1" tabindex="1" ng-class="{ open: expand1 }">
+            <md-button class="menu-header md-hue-1" ng-click="expand1 = !expand1">
+                Behavior / Effects
             </md-button>
-        </menu-link>
 
-        <form name="settingsForm" novalidate>
-            <md-checkbox ng-model="alternate" aria-label="alternate" class="md-primary" ng-change="onChange()">
-                Alternate orientation?
-            </md-checkbox>
-        </form>
+            <menu-section ng-show="expand1" layout-padding>
+                <form novalidate>
+                    <md-checkbox ng-model="alternate" aria-label="alternate" class="md-primary" ng-change="onChange()">
+                        Alternate orientation
+                    </md-checkbox>
 
+                    <md-checkbox ng-model="flat" aria-label="flat" class="md-primary" ng-change="onChange()">
+                        Flat Colors
+                    </md-checkbox>
+                </form>
+            </menu-section>
+        </menu-toggle>
 
-        <menu-link section="section" class="md-hue-1">
-            <md-button class="md-raised md-hue-1" tabindex="1" md-no-ink>
-                Colors / Effects
+        <menu-toggle class="md-hue-1" tabindex="1" ng-class="{ open: expand2 }">
+            <md-button class="menu-header md-hue-1" ng-click="expand2 = !expand2">
+                Boundary Shapes
             </md-button>
+
+            <menu-section ng-show="expand2" layout-padding>
+                <form novalidate>
+                    <md-input-container layout="row">
+                        <md-button class="md-icon-button"
+                                   ng-repeat="(name, shape) in getBoundaryShapes()"
+                                   ng-class="{ 'md-primary md-raised': isSelected(name) }"
+                                   ng-click="setBoundaryShape(name)"
+                                   ng-attr-aria-label="{{ name }}">
+                            <md-tooltip>{{ name | capitalize }}</md-tooltip>
+                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-{{ name }}"></md-icon>
+                        </md-button>
+
+                        <!-- <md-button class="md-icon-button">
+                            <md-tooltip>Square</md-tooltip>
+                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-square"></md-icon>
+                        </md-button>
+                        <md-button class="md-icon-button">
+                            <md-tooltip>Triangle</md-tooltip>
+                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-triangle"></md-icon>
+                        </md-button>
+                        <md-button class="md-icon-button">
+                            <md-tooltip>Circle</md-tooltip>
+                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-circle"></md-icon>
+                        </md-button>
+                        <md-button class="md-icon-button">
+                            <md-tooltip>Star</md-tooltip>
+                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-star"></md-icon>
+                        </md-button> -->
+                    </md-input-container>
+                </form>
+            </menu-section>
+        </menu-toggle>
+
+        <!-- <menu-toggle class="md-hue-1" tabindex="1" ng-class="{ open: expand2 }">
+            <md-button class="menu-header md-hue-1" ng-click="expand2 = !expand2">
+                Shapes
+            </md-button>
+
+            <menu-section ng-show="expand2" layout-padding>
+                <form novalidate>
+                    <md-input-container layout="row">
+                        <md-button class="md-icon-button" style="font-weight:bold;">
+                            <md-tooltip>Seed</md-tooltip>
+                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-seed"></md-icon>
+                        </md-button>
+                        <md-button class="md-icon-button">
+                            <md-tooltip>Spiral</md-tooltip>
+                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-spiral"></md-icon>
+                        </md-button>
+                    </md-input-container>
+                </form>
+            </menu-section>
+        </menu-toggle> -->
+
+        <menu-link class="md-hue-1" tabindex="2" md-no-ink>
+            <md-button class="menu-header md-hue-1">
+                Colors
+            </md-button>
+
+            <menu-section layout-padding>
+                <form novalidate>
+                    <md-input-container>
+                        <color-picker ng-model="color" ng-change="addColor(color)"></color-picker>
+
+                        <md-contact-chips
+                            ng-if="colors.length"
+                            ng-model="colors"
+                            md-contacts="queryColor($query)"
+                            md-contact-name="hex"
+                            md-contact-image="data"
+                            filter-selected="true"
+                            class="md-mini"
+                            ng-change="onChange()"
+                            ng-disabled="true">
+                        </md-contact-chips>
+
+                    </md-input-container>
+                </form>
+            </menu-section>
         </menu-link>
 
-        <form novalidate>
-            <md-checkbox ng-model="gloss" aria-label="gloss" class="md-primary" ng-change="onChange()">
-                Gloss effect?
-            </md-checkbox>
-        </form>
+
 
         <!-- <md-button ng-click="close()" class="md-primary">
           Close Sidenav Right

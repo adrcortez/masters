@@ -24,16 +24,15 @@
 
         // External dependencies
         'ngMaterial',
-
-        'ui.bootstrap',
         'ng-context-menu',
-        'angularSpectrumColorpicker',
 
         // App component dependencies
         'math',
+        'colorpicker',
         'svg',
 
         // Main dependencies
+        'main.filters',
         'main.services',
         'main.controllers',
     ])
@@ -43,6 +42,10 @@
         $routeProvider
             .when('/', {
                 templateUrl: 'views/main.html',
+                controller: 'MainCtrl'
+            })
+            .when('/test', {
+                templateUrl: 'views/test.html',
                 controller: 'MainCtrl'
             })
             .otherwise({

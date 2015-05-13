@@ -1,8 +1,22 @@
-<div id="test" class="container-fluid">
+<md-content class="md-hue-1" layout="column" layout-padding flex>
 
-    <div class="btn-toolbar" role="toolbar">
+    <svg-canvas class="canvas flex md-whiteframe-z1">
 
-        <!-- Edit mode button -->
+        <g stroke="black" fill="none" ng-repeat="l in getBoundaries()">
+
+            <!-- <svg-line sx="100" sy="100" ex="200" ey="200"></svg-line>
+            <svg-line sx="200" sy="200" ex="200" ey="300" cx="250" cy="250"></svg-line> -->
+
+            <svg-line start="l.start" end="l.end" control="l.control" />
+        </g>
+
+        <g ng-repeat="s in boundingSpirals" ng-init="p = s.center" stroke="red">
+            <circle ng-attr-cx="{{ p.x }}" ng-attr-cy="{{ p.y }}" r="1" />
+        </g>
+    </svg-canvas>
+
+    <!-- <div class="btn-toolbar" role="toolbar">
+
         <div class="btn-group">
             <a class="btn btn-default" ng-click="test_circles()">
                 Test Circles
@@ -65,5 +79,5 @@
                   ng-attr-fill="{{ p.color || 'black' }}"
                   r="2" />
         </svg>
-    </div>
-</div>
+    </div> -->
+</md-content>

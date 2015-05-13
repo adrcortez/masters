@@ -1,11 +1,12 @@
 'use strict';
 
 
-angular.module('svg.directives', [])
+angular.module('svg.directives', ['RecursionHelper'])
 
 	.directive('svgCanvas', [
+		'$canvas',
 
-		function () {
+		function ($canvas) {
 	        return {
 	            restrict: 'E',
 	            replace: true,
@@ -14,6 +15,10 @@ angular.module('svg.directives', [])
 				templateNamespace: 'svg',
 
 	            link: function ($scope, element, attrs, ctrl, transclude) {
+
+					// $scope.getShapes = function () {
+					// 	return $canvas.getShapes();
+					// };
 
 					attrs.$observe('scale', function() {
 						$scope.scale = attrs.scale;
@@ -30,112 +35,189 @@ angular.module('svg.directives', [])
     	}
 	])
 
+
+	.directive('svgLine', [
+
+		function () {
+			return {
+				restrict: 'E',
+				replace: true,
+				templateUrl: 'templates/svg/line.html',
+				templateNamespace: 'svg',
+				scope: {
+					start: '=',
+					end: '=',
+					control: '=?'
+				},
+
+	            link: function ($scope, element, attrs) {
+				}
+			};
+		}
+	])
+
+
 	.directive('svgSpiral', [
+		'RecursionHelper',
 		'Color',
 
-		function (Color) {
+		function (RecursionHelper, Color) {
 	        return {
 	            restrict: 'E',
 	            replace: true,
 	            templateUrl: 'templates/svg/spiral.html',
 				templateNamespace: 'svg',
 				scope: {
-					sweep: '&?',
-					width: '&?',
-					theta: '&?',
-					omega: '&?',
-					cx: '&?',
-					cy: '&?',
+					// sweep: '&?',
+					// width: '&?',
+					// theta: '&?',
+					// omega: '&?',
+					// cx: '&?',
+					// cy: '&?',
 					colors: '&?',
-					gloss: '&?'
+					flat: '&?',
+					clip: '&?',
+					children: '=?',
+					spiral: '='
 				},
 
-	            link: function ($scope, element, attrs) {
+				compile: function (element) {
+            		return RecursionHelper.compile(element, function ($scope, element, attrs) {
 
-					// The spiral parameters
-					var sweep = $scope.sweep() || 0,
-						width = $scope.width() || 0,
-						theta = $scope.theta() || 0,
-						omega = $scope.omega() || 1,
-						cx = $scope.cx() || 0,
-						cy = $scope.cy() || 0;
+						// The spiral parameters
+						var spiral = $scope.spiral;
 
-					// The spiral is broken up into segments for rendering
-					var segmentsPerTurn = 20,
-					 	numSegments = sweep * segmentsPerTurn,
-						numColors = numSegments + 1;
-
-					// Split the colors into sgements
-					var colors = Color
-						.split(numColors, $scope.colors());
+						$scope.sweep = spiral.sweep;
+						$scope.width = spiral.width;
+						$scope.theta = spiral.theta;
+						$scope.omega = spiral.omega;
+						$scope.cx = spiral.center.x;
+						$scope.cy = spiral.center.y;
+						$scope.index = spiral.index;
 
 
-					function getPoint (t) {
-						var r = width * t,
-							a = 2 * Math.PI * omega,
-							x = cx + r * Math.cos(theta + a * t),
-		                    y = cy + r * Math.sin(theta + a * t);
+						// The spiral is broken up into multiple
+						// segments for rendering
+						var numSegments = $scope.sweep * 20;
 
-						return { x: x, y: y };
-					}
+						// The spiral colors
+						// var colors = angular.copy($scope.colors());
+						var colors = angular.copy(spiral.colors);
 
-
-					function getControlPoint (t0, t1) {
-
-						// The start/end points of the curve
-						var p0 = getPoint(t0),
-							p1 = getPoint(t1);
-
-						// The mid-point (intersection point)
-						var tm = (t0 + t1) / 2,
-							pm = getPoint(tm);
-
-						// Caculate the control point
-						var x = 2*pm.x - p0.x/2 - p1.x/2,
-			                y = 2*pm.y - p0.y/2 - p1.y/2;
-
-						return { x: x, y: y };
-					}
+						if (colors && colors.length) {
+							// Since the first third of the segments are rather small,
+							// duplicate the first color to more evenly apply
+							// it to the spiral relative to the other colors
+							colors.unshift(colors[0]);
 
 
-					function getSegments () {
-
-						var segments = [];
-
-						// The amount to change at each iteration
-						var delta = 1 / 20;
-
-						for (var t = 0; t < sweep; t += delta) {
-
-							var t0 = t,
-								t1 = Math.min(t + delta + 0.005, sweep),
-								t2 = Math.max(t1 - 1, 0),
-								t3 = Math.max(t0 - 1, 0);
-
-							var p0 = getPoint(t0),
-								p1 = getPoint(t1),
-								p2 = getPoint(t2),
-								p3 = getPoint(t3);
-
-							var c1 = getControlPoint(t0, t1),
-								c2 = getControlPoint(t2, t3);
-
-							// A segment a series of points
-							segments.push([
-								p0, c1, p1,
-								p2, c2, p3
-							]);
+							// Split the color into the necessary number
+							// of sub-colors, 1 more than the number of segments
+							colors = Color.split(numSegments + 1, colors);
 						}
 
-						return segments;
-					}
+
+						function getPoint (t) {
+							var width = $scope.width,
+								theta = $scope.theta,
+								omega = $scope.omega,
+								cx = $scope.cx,
+								cy = $scope.cy;
+
+							var r = width * t,
+								a = 2 * Math.PI * omega,
+								x = cx + r * Math.cos(theta + a * t),
+			                    y = cy + r * Math.sin(theta + a * t);
+
+							return { x: x, y: y };
+						}
 
 
-					// Set the model properties
-					$scope.segments = getSegments();
-					$scope.gloss = $scope.gloss() || false;
-					$scope.colors = colors;
-	            }
+						function getControlPoint (t0, t1) {
+
+							// The start/end points of the curve
+							var p0 = getPoint(t0),
+								p1 = getPoint(t1);
+
+							// The mid-point (intersection point)
+							var tm = (t0 + t1) / 2,
+								pm = getPoint(tm);
+
+							// Caculate the control point
+							var x = 2*pm.x - p0.x/2 - p1.x/2,
+				                y = 2*pm.y - p0.y/2 - p1.y/2;
+
+							return { x: x, y: y };
+						}
+
+
+						function getSegments (tmin, tmax) {
+
+							tmin = tmin || 0;
+							tmax = tmax || $scope.sweep;
+
+							// The amount to change at each iteration
+							var delta = 1 / 20;
+
+							var segments = [];
+							for (var t = tmin; t < tmax; t += delta) {
+
+								var t0 = t,
+									t1 = Math.min(t + delta + 0.005, tmax),
+									t2 = Math.max(t1 - 1, 0),
+									t3 = Math.max(t0 - 1, 0);
+
+								var p0 = getPoint(t0),
+									p1 = getPoint(t1),
+									p2 = getPoint(t2),
+									p3 = getPoint(t3);
+
+								var c1 = getControlPoint(t0, t1),
+									c2 = getControlPoint(t2, t3);
+
+								// A segment a series of points
+								segments.push([
+									p0, c1, p1,
+									p2, c2, p3
+								]);
+							}
+
+							return segments;
+						}
+
+
+						// Set the model properties
+						$scope.segments = getSegments();
+						$scope.outerSegments = getSegments($scope.sweep - 1, $scope.sweep);
+						$scope.innerSegments = getSegments(0, $scope.sweep - 1);
+						$scope.isFlat = spiral.isFlat || false;
+						$scope.colors = colors;
+
+						$scope.strokeWidth = $scope.$eval(attrs.strokeWidth);
+
+						$scope.$watch('children.length', function (value) {
+
+							angular.forEach(spiral.children, function (s) {
+
+								// Determine where the child meets the parent
+								var t = spiral.getEdgeT(s.center.x, s.center.y);
+								var i = Math.floor(20 * t);
+
+								// Determine the parent color where they meet
+								var color = colors[i];
+								var clrs = angular.copy(s.colors);
+
+								// Make the child end on that color. Add it
+								// twice to offset the effects of clipping
+								clrs.push(color);
+								clrs.push(color);
+								s.colors = clrs;
+							});
+
+							$scope.children = spiral.children;
+						});
+		            });
+				}
 	        };
 		}
 	]);

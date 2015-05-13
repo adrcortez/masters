@@ -31,6 +31,7 @@ module.exports = function (grunt) {
             dev: {
                 files: {
                     '<%= yeoman.app %>/styles/main.css': '<%= yeoman.app %>/styles/less/main/styles.less',
+                    '<%= yeoman.app %>/styles/icomoon.css': '<%= yeoman.app %>/styles/less/icomoon/styles.less',
                     '<%= yeoman.app %>/styles/material-design.css': '<%= yeoman.app %>/styles/less/material-design/styles.less',
                     '<%= yeoman.app %>/styles/fluid-spiral.css': '<%= yeoman.app %>/styles/less/fluid-spiral/styles.less'
                 }

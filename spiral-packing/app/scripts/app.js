@@ -1,16 +1,10 @@
 'use strict';
 
 
-/**
- * @ngdoc overview
- * @name spiralApp
- * @description
- * # spiralApp
- *
- * Main module of the application.
- */
  angular
-    .module('spiralApp', [
+    .module('main', [
+
+        // Angular dependencies
         'ngAnimate',
         'ngCookies',
         'ngResource',
@@ -18,8 +12,21 @@
         'ngSanitize',
         'ngTouch',
         'ngResize',
+        'ngMessages',
 
-        'main'
+        // External dependencies
+        'ngMaterial',
+        'ng-context-menu',
+
+        // App component dependencies
+        'math',
+        'colorpicker',
+        'svg',
+
+        // Main dependencies
+        'main.filters',
+        'main.services',
+        'main.controllers',
     ])
 
     // Configure routes
@@ -27,6 +34,10 @@
         $routeProvider
             .when('/', {
                 templateUrl: 'views/main.html',
+                controller: 'MainCtrl'
+            })
+            .when('/test', {
+                templateUrl: 'views/test.html',
                 controller: 'MainCtrl'
             })
             .otherwise({
@@ -40,4 +51,14 @@
         var pattern = /^\s*(https?|ftp|file|blob):|data:image\//;
         $compileProvider.imgSrcSanitizationWhitelist(pattern);
         $compileProvider.aHrefSanitizationWhitelist(pattern);
+    })
+
+
+    // Configure the material design theme
+    .config(function ($mdThemingProvider) {
+        $mdThemingProvider
+            .theme('default')
+            .backgroundPalette('grey')
+            .primaryPalette('indigo')
+            .accentPalette('blue-grey');
     });

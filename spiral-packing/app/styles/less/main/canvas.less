@@ -1,10 +1,7 @@
 .canvas {
-    display: block;
     min-width: 640px;
     min-height: 480px;
     background: #fff;
-    margin: 0 16px;
-    margin-bottom: 16px;
     outline: none;
 
     .editing {
@@ -12,10 +9,19 @@
     }
 
     .spiral {
-        opacity: 1;
-        transition: all 0.5s;
 
         &:hover path {
+            cursor: pointer;
+        }
+    }
+
+    .border {
+        fill: transparent;
+        opacity: 0;
+
+        &:hover {
+            opacity: 1;
+            stroke: rgb(198,40,40);
             cursor: pointer;
         }
     }
