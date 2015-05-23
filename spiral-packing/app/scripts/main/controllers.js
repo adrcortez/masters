@@ -297,7 +297,8 @@ angular.module('main.controllers', [])
 
                 // Exporting start
                 $scope.exporting = true;
-
+                $scope.selected = null;
+                
                 // Exporting complete
                 modalInstance.then(function () {
                     $scope.exporting = false;

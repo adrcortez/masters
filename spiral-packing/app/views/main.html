@@ -79,26 +79,12 @@
         <g class="transient" stroke="grey" stroke-dasharray="5,5">
             <svg-spiral ng-repeat="s in transient" spiral="s"></svg-spiral>
         </g>
+
         <!-- Grid lines -->
         <!-- <rect ng-if="grid"
               ng-attr-width="{{ 100 / zoom }}%"
               ng-attr-height="{{ 100 / zoom }}%"
               fill="url(#grid)"
               opacity=".3"/> -->
-
-        <!-- Borders around the spirals -->
-        <!-- <g ng-repeat="s in spirals"
-           ng-init="cx = s.center.x; cy = s.center.y; r = s.sweep * s.width;">
-
-            <!-- <rect class="border" ng-class="{ selected: isSelected(s) }"
-                  ng-attr-x="{{ cx - r }}" ng-attr-y="{{ cy - r }}"
-                  ng-attr-width="{{ 2 * r }}" ng-attr-height="{{ 2 * r }}"
-                  rx="4" ry="4" /> -->
-
-            <!-- <circle class="border" ng-class="{ selected: isSelected(s) }" ng-click="select(s, $event)"
-                  ng-attr-cx="{{ cx }}" ng-attr-cy="{{ cy }}" ng-attr-r="{{ r }}" />
-        </g> -->
-
-        <!-- <circle ng-attr-cx="{{ getCentroid().x }}" ng-attr-cy="{{ getCentroid().y }}" r="4" stroke="black" fill="black"/> -->
     </svg-canvas>
 </md-content>

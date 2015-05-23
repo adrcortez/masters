@@ -656,101 +656,58 @@ angular.module('main.services', [])
                     return finalize(S);
                 }
 
-                // Two neighbors intersected
-                // else if (intersected.length > 1) {
-                    console.log('INTERSECT 2');
+                // The bounding spirals
+                S1 = bounding[0];
+                S2 = bounding[1];
 
-                    // The bounding spirals
-                    S1 = bounding[0];
-                    S2 = bounding[1];
+                // Fit a spiral S3 to S1 and S2 branching from SP
+                S3 = S.fit(SP, S1, S2);
 
-                    // Fit a spiral S3 to S1 and S2 branching from SP
-                    S3 = S.fit(SP, S1, S2);
+                // While S3 intersects existing (non-parent) spirals
+                var i = 0;
+                while (doesIntersect(S3, SP)) {
+                    console.log('w = ' + S3.width, 'x = ' + S3.center.x, 'y = ' + S3.center.y);
 
-                    // While S3 intersects existing (non-parent) spirals
-                    var i = 0;
-                    while (doesIntersect(S3, SP)) {
-                        console.log('w = ' + S3.width, 'x = ' + S3.center.x, 'y = ' + S3.center.y);
-
-                        if (i > 150) {
-                            debugger;
-                            break;
-                        }
-
-                        // Let S4 be the spiral with the biggest
-                        // intersection with S3
-                        var S4 = getIntersected(S3, SP)[0];
-
-                        // Let S5 be the spiral fitted to S1 and S4
-                        var S5 = S3.fit(SP, S1, S4);
-
-                        // Let S6 be the spiral fitted to S2 and S4
-                        var S6 = S3.fit(SP, S2, S4);
-
-                        // Select S5 or S6 with the smallest width
-                        // and let this be the new S3
-                        var S7 = (S5.width <= S6.width) ? S5 : S6;
-
-                        // If this increases the width of S3, go to Step 5.
-                        if (S7.width > S3.width) {
-                            console.log('WHOMP WHOMP');
-                            console.log(S7.width, S3.width);
-                            debugger;
-                            break;
-                        }
-
-                        // Let the new S1,S2 be S1,S4 or S2,S4 depending
-                        // on whether S5 or S6 was selected.
-                        S1 = (S5.width < S6.width) ? S1 : S2
-                        S2 = S4;
-
-                        // Fit a spiral S3 to S1 and S2
-                        S3 = S7.fit(SP, S1, S2);
-                        i++;
+                    if (i > 150) {
+                        debugger;
+                        break;
                     }
 
-                    if (isValid(S3, SP)) {
-                        return finalize(S3);
+                    // Let S4 be the spiral with the biggest
+                    // intersection with S3
+                    var S4 = getIntersected(S3, SP)[0];
+
+                    // Let S5 be the spiral fitted to S1 and S4
+                    var S5 = S3.fit(SP, S1, S4);
+
+                    // Let S6 be the spiral fitted to S2 and S4
+                    var S6 = S3.fit(SP, S2, S4);
+
+                    // Select S5 or S6 with the smallest width
+                    // and let this be the new S3
+                    var S7 = (S5.width <= S6.width) ? S5 : S6;
+
+                    // If this increases the width of S3, go to Step 5.
+                    if (S7.width > S3.width) {
+                        console.log('Width increased');
+                        console.log(S7.width, S3.width);
+                        debugger;
+                        break;
                     }
-                // }
 
-                // console.log('INTERSECT 1');
-                // S1 = (intersected.length > 1) ? bounding[0] : intersected[0];
-                // S2 = S.fit(SP, S1);
+                    // Let the new S1,S2 be S1,S4 or S2,S4 depending
+                    // on whether S5 or S6 was selected.
+                    S1 = (S5.width < S6.width) ? S1 : S2
+                    S2 = S4;
 
-                // if (isValid(S2, SP)) {
-                    // return finalize(S2);
-                // }
+                    // Fit a spiral S3 to S1 and S2
+                    S3 = S7.fit(SP, S1, S2);
+                    i++;
+                }
 
-                // S2 = S.clone();
-                // for (var i = 0; i < 500; i++) {
-                //
-                //     var intersected = getIntersected(S2, SP);
-                //     if (!intersected || !intersected.length) {
-                //         break;
-                //     }
-                //
-                //     var S1 = intersected[0];
-                //     var c = getBoundedDisc(S2, SP, S1);
-                //
-                //     // c.radius = c.radius - (S1.getRadius(c.center.x, c.center.y) - r1)
-                //
-                //     // Adjust the phase angle for the fitted spiral
-                //     // to ensure the terminal point lies on the line
-                //     // between the centers of SP and S.
-                //     // var dx = SP.center.x - S2.center.x,
-                //     //     dy = SP.center.y - S2.center.y,
-                //     //     theta = Math.atan2(dy, dx);
-                //
-                //     // Fit S
-                //     S2.width = c.radius / (S2.sweep - 1);
-                //     S2.center = new Point2(c.center.x, c.center.y);
-                //     S2 = S2.fit(SP);
-                //
-                //     var rs =
-                // }
-                //
-                // return finalize(S2);
+                if (isValid(S3, SP)) {
+                    return finalize(S3);
+                }
             };
         }
     ]);
