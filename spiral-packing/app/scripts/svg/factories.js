@@ -1,6 +1,83 @@
 'use strict';
 
 
+//*** This code is copyright 2011 by Gavin Kistner, !@phrogz.net
+//*** It is covered under the license viewable at http://phrogz.net/JS/_ReuseLicense.txt
+// path:      an SVG <path> element
+// threshold: a 'close-enough' limit (ignore subdivisions with area less than this)
+// segments:  (optional) how many segments to subdivisions to create at each level
+// returns:   a new SVG <polygon> element
+function pathToPolygon (path, threshold, segments){
+    threshold = threshold || 0.0001;
+    segments = segments || 3;
+
+    // Record the distance along the path with the point for later reference
+    function ptWithLength (d) {
+        var pt = path.getPointAtLength(d);
+        pt.d = d;
+
+        return pt;
+    }
+
+    // Calculate the area of an polygon represented by an array of points
+    function polyArea (points) {
+        var p1,p2;
+        var len = points.length,
+        area = 0;
+
+        for (var i = 0; i < len; i++) {
+            p1 = points[i];
+            p2 = points[(i - 1 + len) % len]; // Previous point, with wraparound
+            area += (p2.x+p1.x) * (p2.y-p1.y);
+        }
+
+        return Math.abs(area/2);
+    }
+
+    // Create segments evenly spaced between two points on the path.
+    // If the area of the result is less than the threshold return the endpoints.
+    // Otherwise, keep the intermediary points and subdivide each consecutive pair.
+    function subdivide (p1, p2) {
+        var step = (p2.d - p1.d) / segments,
+            pts = [p1];
+
+        for (var i = 1; i < segments; i++) {
+            pts[i] = ptWithLength(p1.d + step*i);
+        }
+
+        pts.push(p2);
+
+        if (polyArea(pts) <= threshold) {
+            return [p1, p2];
+        } else {
+            var result = [];
+            for (var i=1;i<pts.length;++i){
+                var mids = subdivide(pts[i-1], pts[i]);
+                mids.pop(); // We'll get the last point as the start of the next pair
+                result = result.concat(mids)
+            }
+            result.push(p2);
+            return result;
+        }
+    }
+
+
+    var p0 = ptWithLength(0),
+        p1 = ptWithLength(path.getTotalLength()),
+        points = subdivide(p0, p1);
+
+    for (var i = points.length; i--;) {
+        points[i] = [points[i].x, points[i].y];
+    }
+
+    var doc  = path.ownerDocument;
+    var poly = doc.createElementNS('http://www.w3.org/2000/svg','polygon');
+    poly.setAttributeNS(null, 'points', points.join(' '));
+    return poly;
+}
+
+
+
 angular.module('svg.factories', [])
 
 
@@ -51,78 +128,92 @@ angular.module('svg.factories', [])
 
                     return Math.sqrt(dx*dx + dy*dy);
                 }
-
-                // // addControlPoint: function (x, y) {
-                // //     this.points.splice(-1, 0, new Point2(x, y));
-                // // },
-                // //
-                // // getStartPoint: function () {
-                // //     return this.points[0];
-                // // },
-                // //
-                // // getEndPoint: function () {
-                // //     return this.points.slice(-1)[0];
-                // // },
-                // //
-                // // getControlPoints: function () {
-                // //     return this.points.slice(1, -1);
-                // // },
-                // //
-                // // getLength: function () {
-                // //     var s = this.getStartPoint(),
-                // //         e = this.getEndPoint(),
-                // //         dx = e.x - s.x,
-                // //         dy = e.y - s.y;
-                // //
-                // //     return Math.sqrt(dx*dx + dy*dy);
-                // // },
-                //
-                // getPoint: function (t) {
-                //
-                //     // Make sure t is between 0 and 1
-                //     t = Math.max(t, 0);
-                //     t = Math.min(t, 1);
-                //
-                //     var s = this.getStartPoint(),
-                //         e = this.getEndPoint();
-                //
-                //     var x = (1-t) * s.x + t * e.x,
-                //         y = (1-t) * s.y + t * e.y;
-                //
-                //     var controls = this.getControlPoints(),
-                //         n = (controls.length || 0) + 1;
-                //
-                //     angular.forEach(controls, function (p, i) {
-                //         var c = $math.choose(n, i) * $math.pow(1-t, n-i) * $math.pow(t, i);
-                //         x += c * p.x;
-                //         y += c * p.y;
-                //     });
-                //
-                //     return new Point2(x, y);
-                //     //
-                //     //     ex = this.end.x,   ey = this.end.y,
-                //     //     cx = this.control && this.control.x,
-                //     //     cy = this.control && this.control.y,
-                //     //     x , y;
-                //     //
-                //     //
-                //     // if (this.control) {
-                //     //     var cx = this.control.x, cy = this.control.y;
-                //     //
-                //     //     x = (1-t)*(1-t)*sx + 2*t*(t-1)*cx + t*t*ex;
-                //     //     y = (1-t)*(1-t)*sy + 2*t*(t-1)*cy + t*t*ey;
-                //     // } else {
-                //     //     x = (1-t)*sx + t*ex;
-                //     //     y = (1-t)*sy + t*ey;
-                //     // }
-                //     //
-                //     // return new Point2(x, y);
-                // }
             };
 
 
             // Return the constructor
             return Line;
+        }
+    ])
+
+
+    .factory('Polygon', [
+        'Point2',
+        'Line',
+
+        function (Point2, Line) {
+
+            // Constructor
+            function Polygon () {
+                this.current = null;
+                this.lines = [];
+                this.path = '';
+            }
+
+
+            // Instance methods
+            Polygon.prototype = {
+
+                getLines: function () {
+                    return this.lines;
+                },
+
+                moveTo: function (x, y) {
+                    this.path += 'M' + x +',' + y + ' ';
+                    this.current = new Point2(x, y);
+                    return this;
+                },
+
+                lineTo: function (x, y) {
+                    var sx = this.current.x,
+                        sy = this.current.y;
+
+                    var line = new Line(sx, sy, x, y);
+                    this.lines.push(line);
+
+                    this.path += 'L' + x +',' + y + ' ';
+                    this.current = new Point2(x, y);
+                    return this;
+                },
+
+                curveTo: function (x, y, cx, cy) {
+                    var sx = this.current.x,
+                        sy = this.current.y;
+
+                    var line = new Line(sx, sy, x, y, cx, cy);
+                    this.lines.push(line);
+
+                    this.path += 'Q' + cx +',' + cy + ' ' + x + ',' + y + ' ';
+                    this.current = new Point2(x, y);
+                    return this;
+                },
+
+                getArea: function () {
+
+                    var path = document.createElementNS('http://www.w3.org/2000/svg','path');
+                    path.setAttributeNS(null, 'd', this.path);
+
+                    // Subdivide the path in to polygon
+                    var polygon = pathToPolygon(path),
+                        pts = polygon.points,
+                        len = pts.numberOfItems;
+
+                    // Total the area of each subdivision
+                    var area = 0;
+                    for(var i = 0; i < len; i++) {
+                        var p1 = pts.getItem(i),
+                            p2 = pts.getItem((i - 1 + len) % len);
+                        area += (p2.x+p1.x) * (p2.y-p1.y);
+                    }
+
+                    // Return the approximated area
+                    return Math.abs(area/2);
+                }
+            };
+
+
+            // Return the constructor
+            return Polygon;
         }
     ])
 

@@ -51,14 +51,7 @@ angular.module('main.services', [])
             var alternate = true;
             var isFlat = true;
             var colors = [];
-            var boundaryShape = null;
-
-            var boundaryShapes = {
-                'rectangle': new Rectangle(50, 50, 400, 300),
-                'triangle': new Triangle(150, 500, 650, 500, 400, 50),
-                'circle': new Circle(200, 300, 300)
-            };
-
+            var defaultColors = ['#000000'];
 
         	this.getSweep = function () {
                 return sweep;
@@ -115,7 +108,7 @@ angular.module('main.services', [])
 
 
             this.getColors = function () {
-                return colors;
+                return (colors && colors.length) ? colors : defaultColors;
             };
 
             this.setColors = function (value) {
@@ -138,153 +131,108 @@ angular.module('main.services', [])
     ])
 
     .service('$spirals', [
+        '$rootScope',
+        '$settings',
         'Circle',
         'Point2',
         'Line',
         'Spiral',
+        'primaryColors',
+        'secondaryColors',
+        'tertiaryColors',
 
-        function (Circle, Point2, Line, Spiral) {
+        function ($rootScope, $settings, Circle, Point2, Line, Spiral, primaryColors, secondaryColors, tertiaryColors) {
 
+            var seeds = [];
             var spirals = [];
-            var boundaries = [];
+
+            var boundary = null;
+            var boundaryArea = 0;
+            var packedArea = 0;
+            var selected = null;
+            var balance = null;
+            var colorHarmony = null;
+
+
+            function getConnectedSet (S) {
+
+                var a = [];
+                angular.forEach(S.children, function (s) {
+                    var subset = getConnectedSet(s);
+                    a.push.apply(a, subset);
+                });
+
+                return [S].concat(a);
+            }
+
+            function update() {
+
+                // Update the list of spirals. Recursively traverse the
+                // connected sets to get the actual spirals, starting with
+                // the seed spirals
+                spirals = [];
+                angular.forEach(seeds, function (seed) {
+                    var set = getConnectedSet(seed);
+                    spirals.push.apply(spirals, set);
+                });
+
+                // Recalculate the balance/harmony
+                calculateBalance();
+                calculateColorHarmony();
+
+                $rootScope.$broadcast('$spirals.changed');
+            }
 
 
             function getBoundarySpirals () {
 
-                var spirals = [];
+                if (!boundary) { return []; }
 
-                angular.forEach(boundaries, function (line) {
+                var spirals = [];
+                angular.forEach(boundary.getLines(), function (line) {
                     var m = line.getLength() - 1;
 
                     for (var i = 0; i <= m; i++) {
                         var t = i / m,
                             p = line.getPoint(t),
-                            s = new Spiral(10, 0.05, 0, 1, p.x, p.y);
+                            s = new Spiral(100, 0.005, 0, 1, p.x, p.y);
 
                         spirals.push(s);
                     }
                 });
 
                 return spirals;
-            };
+            }
 
             function getAllSpirals () {
 
                 // First, get the boundary lines represented as tiny spirals
-                var allSpirals = getBoundarySpirals();
+                var boundarySpirals = getBoundarySpirals();
 
-                // Then add in the actual sprials
-                allSpirals.push.apply(allSpirals, spirals);
-
-                return allSpirals;
+                // Add the list of user placed spirals and return
+                return boundarySpirals.concat(spirals);
             };
 
-            function getBoundingRadius (S, SP, S1) {
-
-                var xs = S.center.x,  ys = S.center.y,
-                    xp = SP.center.x, yp = SP.center.y,
-                    x1 = S1.center.x, y1 = S1.center.y;
-
-                var rp = SP.getRadius(xs, ys),
-                    r1 = S1.getRadius(xs, ys);
-
-                // var a = Math.sqrt(m*m + 1),
-                //     b = 2 * (m*yp - m*y1 - m*m*xp - x1),
-                //     c = m*m*xp*xp + 2*m*xp*(y1-yp) + x1*x1 + (yp-y1)*(yp-y1),
-                //     d = (rp-r1) + a*xp;
-                // var m = (ys - yp) / (xs - xp),
-                    // n = Math.sqrt(m*m + 1),
-                    // dx = x1 - xp,
-                    // dy = y1 - yp,
-                    // dr = r1 - rp;
-
-                // var x = (d*d - c) / (b - 2*d*a),
-                //     r = a*(x - xp) - rp;
-                // var a = (x1*x1) + (m*xp + dy) * (m*xp + dy),
-                //     b = 2 * (dx + m*dy + n*dr);
-                //
-                // var x = a / b,
-                //     r = n * (x - xp) - rp;
-
-                // var a = (dx*dx + dy*dy) + (rp*rp - r1*r1),
-                //     b = 2 * (dx + m*dy) / Math.sqrt(m*m + 1),
-                //     c = 2 * (r1 - rp);
-                //
-                // var R1 = (a - b*rp) / (c + b),
-                //     R2 = (a + b*rp) / (c - b);
-
-                var m = (ys - yp) / (xs - xp),
-                    dx = (xp - x1),
-                    dy = (yp - y1);
-
-                var a = (x1*x1 + y1*y1 - r1*r1) - (xp*xp + yp*yp - rp*rp),
-                    b = 2 * (dx + m*dy) * (1 + rp/Math.sqrt(m*m+1)),
-                    c = 2 * dy * (yp - m*xp),
-                    d = 2 * ((r1 - rp) - (dx + m*dy)/Math.sqrt(m*m+1));
-
-                var r = (a + b + c) / d;    
-                // var r = R1 > 0 ? R1 : R2;
-                // var r = Math.abs(R1);
-
-                console.log('spiral:', S1.index, 'r= ', r);
-                return r;
-            };
-
-            this.getBoundingDiscs = function (x, y, SP) {
-                var S = { center: { x:x, y:y }};
-
-                var xs = S.center.x,  ys = S.center.y,
-                    xp = SP.center.x, yp = SP.center.y,
-                    rp = SP.getRadius(xs, ys);
-
-                var m = (ys - yp) / (xs - xp);
-
-                var allSpirals = getAllSpirals();
-                return _(allSpirals)
-                    .filter(function (s) { return !s.equals(SP); })
-                    .map(function (s) {
-                        var R = getBoundingRadius(S, SP, s),
-                            X = xp + (R + rp) / Math.sqrt(m*m + 1),
-                            Y = yp + m *(R + rp) / Math.sqrt(m*m + 1);
-
-                        return { x:X, y:Y, r:R };
-                    })
-                    .value();
-            };
-
-
-            function getBoundingSpirals (S, SP) {
-                var allSpirals = getAllSpirals();
-                return _(allSpirals)
-                    .filter(function (s) { return !s.equals(SP) && !s.equals(S); })
-                    .sortBy(function (s) { return getBoundingRadius(S, SP, s); })
-                    .take(2)
-                    .value();
-            };
-
-            function getNeighbors (S, SP) {
+            function getIntersected (S, SP) {
 
                 // Get all of the spirals, including those making up the
                 // boundary shape
                 var allSpirals = getAllSpirals();
 
-                // Return the non-parent spirals, sorted by the
-                // intersection amount
+                // Return the neighboring spirals that intersect S
                 return _(allSpirals)
-                    .filter(function (s) { return !s.equals(SP) && !s.equals(S); })
+                    .filter(function (s) { return !s.equals(SP) })
                     .filter(function (s) { return s.intersects(S); })
                     .sortBy(function (s) { return s.getDistance(S); })
                     .value();
-            };
+            }
 
             function doesIntersect (S, SP) {
 
                 // Return true if any of the neighboring spirals
                 // intersects S
-                var neighbors = getNeighbors(S, SP);
-                return _.some(neighbors, function (s) {
-                    return s.intersects(S);
-                });
+                var intersected = getIntersected (S, SP);
+                return intersected && intersected.length > 0;
             };
 
             function isValid (S, SP) {
@@ -303,55 +251,250 @@ angular.module('main.services', [])
                 // return (!intersects) && (angle <= 12.5);
             };
 
-        	this.all = function () {
+
+            function calculateCentroid () {
+
+                if (!spirals || !spirals.length) {
+                    return;
+                }
+
+                var cx = 0, cy = 0;
+                angular.forEach(spirals, function (s) {
+                    cx += s.center.x;
+                    cy += s.center.y;
+                });
+
+                cx /= spirals.length;
+                cy /= spirals.length;
+
+                return { x: cx, y: cy };
+            };
+
+            function calculateBalance () {
+
+                // Get the centroid of the packed area
+                var centroid = calculateCentroid();
+                if (!centroid) { return; }
+
+                var left = 0, right = 0,
+                    top = 0, bottom = 0;
+
+                angular.forEach(spirals, function (s) {
+                    var area = s.getArea();
+
+                    // Left/right balance
+                    if (s.center.x < centroid.x) { left += area; }
+                    else if (s.center.x > centroid.x) { right += area; }
+                    else { left += area/2; right += area/2; }
+
+                    // Top/bottom balance (inverse y-coordinate system)
+                    if (s.center.y < centroid.y) { top += area; }
+                    else if (s.center.y > centroid.y) { bottom += area; }
+                    else { top += area/2; bottom += area/2; }
+                });
+
+                var vbalance = (right - left) / packedArea,
+                    hbalance = (top - bottom) / packedArea;
+
+                balance = {
+                    vertical: vbalance,
+                    horizontal: hbalance
+                };
+            }
+
+            function calculateColorHarmony () {
+
+                // No spirals to calculate the harmony for
+                if (!spirals || !spirals.length) {
+                    colorHarmony = null;
+                    return;
+                }
+
+                function getColors () {
+                    var colors = {};
+
+                    angular.forEach(spirals, function (s) {
+                        angular.forEach(s.colors, function (c) {
+                            colors[c] = null;
+                        });
+                    });
+
+                    return Object.keys(colors);
+                }
+
+                function deltaE (c1, c2) {
+                    var rgb1 = tinycolor(c1).toRgb(),
+                        rgb2 = tinycolor(c2).toRgb();
+
+                    var r1 = rgb1.r, g1 = rgb1.g, b1 = rgb1.b,
+                        r2 = rgb2.r, g2 = rgb2.g, b2 = rgb2.b;
+
+                    var lab1 = colorConvert.rgb2labRaw([r1, g1, b1]),
+                        lab2 = colorConvert.rgb2labRaw([r2, g2, b2]);
+
+                    var l1 = lab1[0], a1 = lab1[1], b1 = lab1[2],
+                        l2 = lab2[0], a2 = lab2[1], b2 = lab2[2];
+
+                    var dl = l2 - l1,
+                        da = a2 - a1,
+                        db = b2 - b1;
+
+                    return Math.sqrt(dl*dl + da*da + db*db);
+                }
+
+                function calculateMinDifference (color, colors) {
+                    var diff = Infinity;
+                    angular.forEach(colors, function (c) {
+                        var dE = deltaE(color, c);
+                        diff = Math.min(diff, dE);
+                    });
+                    return diff;
+                }
+
+                function groupDifference (colors, group) {
+                    var totalDiff = 0;
+                    angular.forEach(colors, function (c1) {
+                        var min = calculateMinDifference(c1, group);
+                        totalDiff += min;
+                    });
+                    return totalDiff / colors.length;
+                }
+
+                function schemeDifference (colors, scheme) {
+
+                    // The first color is the primary color
+                    var primary = colors[0];
+
+                    var hsv = tinycolor(primary).toHsv(),
+                        scheme = Please.make_scheme(hsv, { scheme_type: scheme, format: 'hex' });
+
+                    var totalDiff = 0;
+                    angular.forEach(colors, function (c1) {
+                        var min = calculateMinDifference(c1, scheme);
+                        totalDiff += min;
+                    });
+
+                    return totalDiff / colors.length;
+                }
+
+                // Get the unique set of colors
+                var colors = getColors();
+
+                // No colors to calculate the harmony for
+                if (!colors || !colors.length) {
+                    colorHarmony = null;
+                    return;
+                }
+
+                // Only one color is harmonious
+                if (colors.length === 1) {
+                    colorHarmony = 1;
+                    return;
+                }
+
+                // Get the difference from the different color schemes
+                var primary = groupDifference(colors, primaryColors),
+                    secondary = groupDifference(colors, secondaryColors),
+                    tertiary = groupDifference(colors, tertiaryColors);
+
+                // Get the difference from the different color schemes
+                var complementary = schemeDifference(colors, 'complementary'),
+                    split = schemeDifference(colors, 'split-complementary'),
+                    triadic = schemeDifference(colors, 'triadic'),
+                    double = schemeDifference(colors, 'double-complementary'),
+                    monochromatic = schemeDifference(colors, 'monochromatic'),
+                    analogous = schemeDifference(colors, 'analogous');
+
+                // Determine the minimum difference from what are considered
+                // harmonious colors sets
+                var minDifference = Math.min(
+                    primary, secondary, tertiary,
+                    complementary, split, triadic,
+                    double, monochromatic, analogous);
+
+                // Calculate the color harmony as a percentage
+                colorHarmony = (176.884921022 - minDifference) / 176.884921022;
+            }
+
+        	this.get = function () {
                 return spirals;
             };
 
-            this.get = function (idx) {
-                return spirals[idx];
-            };
-
-            this.size = function () {
-                return spirals.length || 0;
-            };
-
-            this.add = function (S) {
-                if (S) {
-                    S.index = this.size();
-                    spirals.push(S);
-                }
-            };
-
-
-            this.getBoundaryLines = function () {
-                return boundaries || [];
-            };
-
-            this.addBoundaryLine = function (sx, sy, ex, ey, cx, cy) {
-                var line = new Line(sx, sy, ex, ey, cx, cy)
-                boundaries = boundaries || [];
-                boundaries.push(line);
-            };
-
-
             this.remove = function (spiral) {
 
-                // Remove the selected spiral
-                _.remove(spirals, function (s) {
-                    return s.equals(spiral);
-                });
+                // No spiral specified
+                if (!spiral) { return; }
 
-                // Remove all child references
-                _.each(spirals, function (s) {
-                    _.remove(s.children, function (c) {
-                        return c.equals(spiral);
+
+                // Seed spiral removed
+                if (!spiral.parent) {
+                    _.remove(seeds, function (s) {
+                        return s.equals(spiral);
                     });
-                });
+                }
+
+                // Child spiral removed
+                else {
+                    _.remove(spiral.parent.children, function (s) {
+                        return s.equals(spiral);
+                    });
+                }
+
+                packedArea -= spiral.getArea();
+                update();
             };
 
-            this.seed = function (sweep, width, theta, omega, x, y) {
 
-                var T = sweep, w = width, t = theta, o = omega;
+            // Boundary shape functions
+            this.getBoundary = function () {
+                return boundary;
+            };
+
+            this.setBoundary = function (polygon) {
+                boundary = polygon;
+                boundaryArea = polygon.getArea();
+            };
+
+            this.clearBoundary = function () {
+                boundary = null;
+            };
+
+
+            // Area/porosity functions
+            this.getBoundaryArea = function () {
+                return boundary ? boundaryArea : Infinity;
+            };
+
+            this.getPackedArea = function () {
+                return packedArea;
+            };
+
+            this.getPorosity = function () {
+                var ab = this.getBoundaryArea(),
+                    ap = this.getPackedArea();
+                return (ab - ap) / ab;
+            };
+
+            this.getBalance = function () {
+                return balance;
+            };
+
+            this.getColorHarmony = function () {
+                return colorHarmony;
+            };
+
+
+
+            // this.seed = function (sweep, width, theta, omega, x, y) {
+            this.seed = function (x, y) {
+
+                // Get the values from the settings
+                var T = $settings.getSweep(),
+                    w = $settings.getWidth(),
+                    t = $settings.getTheta(),
+                    o = $settings.getOmega();
+                //
+                // var T = sweep, w = width, t = theta, o = omega;
 
                 // Precalculate some stuff
                 var x0 = x - w * T * Math.cos(t)/2,
@@ -366,93 +509,248 @@ angular.module('main.services', [])
                 var s0 = new Spiral(T, w, t, o, x0, y0),
                     s1 = new Spiral(T, w, -t, o, x1, y1);
 
-                // Add the seed spirals if they are valid
                 if (isValid(s0) && isValid(s1)) {
                     return [s0, s1];
                 }
+
+                // Add the seed spirals if they are valid
+                // if (isValid(s0) && isValid(s1)) {
+                //     seeds.push(s0);
+                //     seeds.push(s1);
+                //
+                //     packedArea += s0.getArea();
+                //     packedArea += s1.getArea();
+                //     update();
+                // }
+            };
+
+            this.addSeeds = function (s0, s1) {
+                if (!isValid(s0) || !isValid(s1)) {
+                    return;
+                }
+
+                // Set the spiral colors/effects
+                s0.colors = $settings.getColors();
+                s1.colors = $settings.getColors();
+                s0.isFlat = $settings.isFlat();
+                s1.isFlat = $settings.isFlat();
+
+                seeds.push(s0);
+                seeds.push(s1);
+
+                packedArea += s0.getArea();
+                packedArea += s1.getArea();
+
+                update();
             };
 
 
-            this.branch = function (SP, sweep, omega, x, y) {
+            this.branch = function (x, y, SP) {
+                console.clear();
+
+                function getBoundedDisc (S, SP, S1) {
+
+                    var xs = S.center.x,  ys = S.center.y,
+                        xp = SP.center.x, yp = SP.center.y,
+                        x1 = S1.center.x, y1 = S1.center.y;
+
+                    var rp = SP.getRadius(xs, ys),
+                        r1 = S1.getRadius(xs, ys);
+
+                    var v = SP.getEdgePoint(xs, ys);
+
+                    var cs = new Circle(0, xs, ys),
+                        cp = new Circle(rp, xp, yp),
+                        c1 = new Circle(r1, x1, y1),
+                        cv = new Circle(0, v.x, v.y),
+                        c = cs.fit(cp, c1, cv);
+
+                    // console.log('r =', c.radius, 'x =', c.center.x, 'y =', c.center.y);
+                    return c;
+                }
+
+                function getMaximallyBoundedDisc (S, SP) {
+
+                    var minc = null;
+                    angular.forEach(spirals, function (s) {
+                        var c = getBoundedDisc(S, SP, s);
+                        minc = (!minc || c.radius < minc.radius) ? c : minc;
+                    });
+
+                    return minc;
+                }
+
+                // Gets the spirals that restrict the placement the most
+                function getBoundingSpirals (S) {
+
+                    // Get all of the spirals, including those making up the
+                    // boundary shape
+                    var allSpirals = getAllSpirals();
+
+                    // Return the two bounding spirals
+                    return _(allSpirals)
+                        .filter(function (s) { return !s.equals(S) && !s.equals(SP); })
+                        .sortBy(function (s) { return S.center.getDistance(s.center); })
+                        .value();
+                }
+
+                // Perform some final operations on the spiral to return
+                function finalize (s) {
+
+                    // Set the spiral colors/effects
+                    s.colors = $settings.getColors();
+                    s.isFlat = $settings.isFlat();
+
+                    // Set relationship references
+                    SP.addChild(s);
+
+                    packedArea += s.getArea();
+                    update();
+                }
+
+
+                // Get the values from the settings
+                var sweep = $settings.getSweep(),
+                    omega = $settings.getOmega();
+
+                // Use the opposite of the parent orientation for the child
+                // if set to alternating orientation
+                omega = $settings.shouldAlternate() ? -SP.omega : omega;
+
 
                 // The starting position can not be inside of
                 // the parent spiral
                 if (SP.contains(x, y)) {
+                    console.error('The position can not be inside of SP');
                     return;
                 }
 
-                // Adjust the center of S if the width is too large
+                // Determine the width of S based on the specified
+                // location, the maximum width being the width of the parent.
                 var u = new Point2(x, y),
                     v = SP.getEdgePoint(x, y),
                     d = u.getDistance(v),
                     r = d / (sweep - 1),
-                    w = Math.min(r, SP.width),
-                    m = w * (sweep - 1) / d;
-
-                x = (1-m)*v.x + m*x;
-                y = (1-m)*v.y + m*y;
-
-                // Calculate the phase angle for the new spiral
-                var dx = SP.center.x - x,
-                    dy = SP.center.y - y,
-                    theta = Math.atan2(dy, dx);
+                    w = Math.min(r, SP.width);
 
                 // Construct S, the child spiral
-                var S = new Spiral(sweep, w, theta, omega, x, y);
+                var S = new Spiral(sweep, w, 0, omega, x, y);
 
-                // Try to fit the spiral
-                var S3 = S.clone();
-                S3.index = S.index;
-                var i = 0;
+                // Make sure the spiral is tangent to the parent
+                // and in the correct orientation to start
+                S = S.fit(SP);
 
-                while (true) {
 
-                    // No need to do the fitting if the spiral
-                    // doesn't intersect any other spirals
-                    if (!doesIntersect(S3, SP)) {
-                        break;
-                    }
+                // Get the bounding spirals
+                var bounding = getBoundingSpirals(S, SP);
+                console.log(bounding);
 
-                    var neighbors = getNeighbors(S3, SP);
-                    var oldWidth = S3.width;
+                // Get the intersected spirals
+                var intersected = getIntersected(S, SP);
 
-                    var b = getBoundingSpirals(S3, SP);
-                    // console.log(b);
+                var S1, S2, S3;
 
-                    var S1 = neighbors[0],
-                        S2 = neighbors[1];
-
-                    S3 = S3.fit(SP, S1, S2);
-
-                    if (S3.width > oldWidth) {
-                        console.log('WHOMP WHOMP');
-                        break;
-                    }
-
-                    if (i > 150) {
-                        console.log('OH NO');
-                        break;
-                    }
-                    i++;
+                // No neighbors intersected
+                if (!intersected || !intersected.length) {
+                    console.log('INTERSECT 0');
+                    return finalize(S);
                 }
 
-                // if (isValid(S3, SP)) {
-                    return S3;
+                // Two neighbors intersected
+                // else if (intersected.length > 1) {
+                    console.log('INTERSECT 2');
+
+                    // The bounding spirals
+                    S1 = bounding[0];
+                    S2 = bounding[1];
+
+                    // Fit a spiral S3 to S1 and S2 branching from SP
+                    S3 = S.fit(SP, S1, S2);
+
+                    // While S3 intersects existing (non-parent) spirals
+                    var i = 0;
+                    while (doesIntersect(S3, SP)) {
+                        console.log('w = ' + S3.width, 'x = ' + S3.center.x, 'y = ' + S3.center.y);
+
+                        if (i > 150) {
+                            debugger;
+                            break;
+                        }
+
+                        // Let S4 be the spiral with the biggest
+                        // intersection with S3
+                        var S4 = getIntersected(S3, SP)[0];
+
+                        // Let S5 be the spiral fitted to S1 and S4
+                        var S5 = S3.fit(SP, S1, S4);
+
+                        // Let S6 be the spiral fitted to S2 and S4
+                        var S6 = S3.fit(SP, S2, S4);
+
+                        // Select S5 or S6 with the smallest width
+                        // and let this be the new S3
+                        var S7 = (S5.width <= S6.width) ? S5 : S6;
+
+                        // If this increases the width of S3, go to Step 5.
+                        if (S7.width > S3.width) {
+                            console.log('WHOMP WHOMP');
+                            console.log(S7.width, S3.width);
+                            debugger;
+                            break;
+                        }
+
+                        // Let the new S1,S2 be S1,S4 or S2,S4 depending
+                        // on whether S5 or S6 was selected.
+                        S1 = (S5.width < S6.width) ? S1 : S2
+                        S2 = S4;
+
+                        // Fit a spiral S3 to S1 and S2
+                        S3 = S7.fit(SP, S1, S2);
+                        i++;
+                    }
+
+                    if (isValid(S3, SP)) {
+                        return finalize(S3);
+                    }
                 // }
 
-                // console.log('INVALID');
+                // console.log('INTERSECT 1');
+                // S1 = (intersected.length > 1) ? bounding[0] : intersected[0];
+                // S2 = S.fit(SP, S1);
+
+                // if (isValid(S2, SP)) {
+                    // return finalize(S2);
+                // }
+
+                // S2 = S.clone();
+                // for (var i = 0; i < 500; i++) {
                 //
-                // var spirals = _($spirals.get())
-                //     .filter(function (s) { return !s.equals(SP); })
-                //     .sortBy(function (s) { return s.getDistanceToPoint(S.center); })
-                //     .value();
+                //     var intersected = getIntersected(S2, SP);
+                //     if (!intersected || !intersected.length) {
+                //         break;
+                //     }
                 //
-                // var v = SP.getEdgePoint(S.center.x, S.center.y),
-                //     S1 = spirals[0],
-                //     S2 = new Spiral(100, 0, 0, 1, v);
+                //     var S1 = intersected[0];
+                //     var c = getBoundedDisc(S2, SP, S1);
                 //
-                // $scope.bc3 = new Circle(0, S2.center);
-                // return fit(S, SP, S1, S2);
+                //     // c.radius = c.radius - (S1.getRadius(c.center.x, c.center.y) - r1)
+                //
+                //     // Adjust the phase angle for the fitted spiral
+                //     // to ensure the terminal point lies on the line
+                //     // between the centers of SP and S.
+                //     // var dx = SP.center.x - S2.center.x,
+                //     //     dy = SP.center.y - S2.center.y,
+                //     //     theta = Math.atan2(dy, dx);
+                //
+                //     // Fit S
+                //     S2.width = c.radius / (S2.sweep - 1);
+                //     S2.center = new Point2(c.center.x, c.center.y);
+                //     S2 = S2.fit(SP);
+                //
+                //     var rs =
+                // }
+                //
+                // return finalize(S2);
             };
         }
     ]);

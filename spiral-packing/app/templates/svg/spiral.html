@@ -1,80 +1,68 @@
-<g class="shape spiral" fill="transparent">
+<g class="shape spiral" fill="none">
 
-    <!-- Spiral outer stroke -->
-    <g>
-        <g ng-repeat="s in outerSegments track by $index"
-           ng-init="p0 = s[0]; c1 = s[1]; p1 = s[2];"
-           ng-attr-stroke-width="{{ 1 * strokeWidth }}">
-            <path ng-attr-d="M {{ p0.x }} {{ p0.y }}
-                             Q {{ c1.x }} {{ c1.y }}
-                               {{ p1.x }} {{ p1.y }}" />
-        </g>
-    </g>
-
-    <g ng-if="children.length">
-        <svg-spiral ng-repeat="s in children track by $index"
-                    spiral="s"
-                    stroke="black" stroke-width="1">
+    <!-- <g ng-if="children.length">
+        <svg-spiral ng-repeat="s in children" spiral="s"
+                    stroke-width="1" ng-click="ngClick()" selected="selected">
         </svg-spiral>
-    </g>
+    </g> -->
 
-    <!-- Spiral fill/gloss -->
-    <g stroke="none" stroke-width="0" ng-if="colors.length">
-        <g ng-repeat="s in segments track by $index"
-           ng-init="p0 = s[0]; c1 = s[1]; p1 = s[2];
-                    p2 = s[3]; c2 = s[4]; p3 = s[5];
-                    x1 = (p0.x + p3.x) / 2;
-                    y1 = (p0.y + p3.y) / 2;
-                    x2 = (p1.x + p2.x) / 2;
-                    y2 = (p1.y + p2.y) / 2;
-                    id = '' + $id + $index">
+    <g ng-if="width*sweep > 1" ng-click="onClick($event)" class="body" ng-class="{ 'selected': isSelected }">
+        <!-- Spiral fill/gloss -->
+        <g stroke="none" stroke-width="0" ng-if="colors.length">
+            <g ng-repeat="s in segments track by $index"
+               ng-init="p0 = s[0]; c1 = s[1]; p1 = s[2];
+                        p2 = s[3]; c2 = s[4]; p3 = s[5];
+                        x1 = (p0.x + p3.x) / 2;
+                        y1 = (p0.y + p3.y) / 2;
+                        x2 = (p1.x + p2.x) / 2;
+                        y2 = (p1.y + p2.y) / 2;
+                        id = '' + $id + $index">
 
-            <defs>
-                <linearGradient ng-attr-id="fill{{ id }}"
-                                ng-attr-x1="{{ x1 }}" ng-attr-y1="{{ y1 }}"
-                                ng-attr-x2="{{ x2 }}" ng-attr-y2="{{ y2 }}"
-                                gradientUnits="userSpaceOnUse">
-                    <stop ng-attr-stop-color="{{ colors[$index] }}" offset="0" />
-                    <stop ng-attr-stop-color="{{ colors[$index + 1] }}" offset="1" />
-                </linearGradient>
+                <defs>
+                    <linearGradient ng-attr-id="fill{{ id }}"
+                                    ng-attr-x1="{{ x1 }}" ng-attr-y1="{{ y1 }}"
+                                    ng-attr-x2="{{ x2 }}" ng-attr-y2="{{ y2 }}"
+                                    gradientUnits="userSpaceOnUse">
+                        <stop ng-attr-stop-color="{{ colors[$index] }}" offset="0" />
+                        <stop ng-attr-stop-color="{{ colors[$index + 1] }}" offset="1" />
+                    </linearGradient>
 
-                <linearGradient ng-attr-id="gloss{{ id }}"
-                                ng-attr-x1="{{ (x1+x2)/2 - (y2-y1) }}"
-                                ng-attr-y1="{{ (y1+y2)/2 - (x1-x2) }}"
-                                ng-attr-x2="{{ (x1+x2)/2 + (y2-y1) }}"
-                                ng-attr-y2="{{ (y1+y2)/2 + (x1-x2) }}"
-                                gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#000" offset="0"/>
-                    <stop stop-color="#fff" offset=".5"/>
-                    <stop stop-color="#000" offset="1"/>
-                </linearGradient>
-            </defs>
+                    <linearGradient ng-attr-id="gloss{{ id }}"
+                                    ng-attr-x1="{{ (x1+x2)/2 - (y2-y1) }}"
+                                    ng-attr-y1="{{ (y1+y2)/2 - (x1-x2) }}"
+                                    ng-attr-x2="{{ (x1+x2)/2 + (y2-y1) }}"
+                                    ng-attr-y2="{{ (y1+y2)/2 + (x1-x2) }}"
+                                    gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#000" offset="0"/>
+                        <stop stop-color="#fff" offset=".5"/>
+                        <stop stop-color="#000" offset="1"/>
+                    </linearGradient>
+                </defs>
 
-            <!-- Fill -->
-            <g ng-attr-fill="url(#fill{{ id }})">
-                <path ng-attr-d="M {{ p0.x }} {{ p0.y }}
-                                 Q {{ c1.x }} {{ c1.y }}
-                                   {{ p1.x }} {{ p1.y }}
-                                 L {{ p2.x }} {{ p2.y }}
-                                 Q {{ c2.x }} {{ c2.y }}
-                                   {{ p3.x }} {{ p3.y }} Z" />
-            </g>
+                <!-- Fill -->
+                <g ng-attr-fill="url(#fill{{ id }})">
+                    <path ng-attr-d="M {{ p0.x }} {{ p0.y }}
+                                     Q {{ c1.x }} {{ c1.y }}
+                                       {{ p1.x }} {{ p1.y }}
+                                     L {{ p2.x }} {{ p2.y }}
+                                     Q {{ c2.x }} {{ c2.y }}
+                                       {{ p3.x }} {{ p3.y }} Z" />
+                </g>
 
-            <!-- Gloss -->
-            <g opacity="0.3" ng-attr-fill="url(#gloss{{ id }})" ng-if="!isFlat">
-               <path ng-attr-d="M {{ p0.x }} {{ p0.y }}
-                                Q {{ c1.x }} {{ c1.y }}
-                                  {{ p1.x }} {{ p1.y }}
-                                L {{ p2.x }} {{ p2.y }}
-                                Q {{ c2.x }} {{ c2.y }}
-                                  {{ p3.x }} {{ p3.y }} Z" />
+                <!-- Gloss -->
+                <g opacity="0.3" ng-attr-fill="url(#gloss{{ id }})" ng-if="!isFlat">
+                   <path ng-attr-d="M {{ p0.x }} {{ p0.y }}
+                                    Q {{ c1.x }} {{ c1.y }}
+                                      {{ p1.x }} {{ p1.y }}
+                                    L {{ p2.x }} {{ p2.y }}
+                                    Q {{ c2.x }} {{ c2.y }}
+                                      {{ p3.x }} {{ p3.y }} Z" />
+                </g>
             </g>
         </g>
-    </g>
 
-    <!-- Spiral inner stroke -->
-    <g>
-        <g ng-repeat="s in innerSegments track by $index"
+        <!-- Spiral stroke -->
+        <g ng-repeat="s in stroke"
            ng-init="p0 = s[0]; c1 = s[1]; p1 = s[2];"
            ng-attr-stroke-width="{{ 0.5 * strokeWidth }}">
             <path ng-attr-d="M {{ p0.x }} {{ p0.y }}
@@ -83,5 +71,9 @@
         </g>
     </g>
 
-    <text ng-attr-x="{{ cx }}" ng-attr-y="{{ cy }}" fill="black">{{ index }}</text>
+
+    <!-- If the spiral is tiny, draw it as a point -->
+    <g ng-if="width*sweep <= 1" ng-click="onClick(s, $event)">
+        <circle ng-attr-x="{{ cx }}" ng-attr-x="{{ cy }}" ng-attr-r="{{ width*sweep }}" />
+    </g>
 </g>

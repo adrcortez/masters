@@ -1,13 +1,28 @@
 \begin{thebibliography}{1}
 
+\bibitem{Browne2006834}
+C.~Browne and P.~Wamelen.
+\newblock Spiral packing.
+\newblock {\em Computers and Graphics}, 30(5):834 -- 842, 2006.
+
 \bibitem{Bourke2006}
-Paul Bourke.
+Bourke P.
 \newblock An introduction to the apollony fractal.
 \newblock {\em Computers and Graphics}, 30(1):134--136, January 2006.
 
-\bibitem{Browne2006834}
-Cameron Browne and Paul van Wamelen.
-\newblock Spiral packing.
-\newblock {\em Computers and Graphics}, 30(5):834 -- 842, 2006.
+\bibitem{quiller2002}
+Quiller S.
+\newblock {\em Color Choices: Making Color Sense Out of Color Theory}.
+\newblock Watson-Guptill, 2002.
+
+\bibitem{wei2014}
+S.~T. Wei, L.~C. Ou, M.~R. Luo, and J.~B. Hutchings.
+\newblock Package design: Colour harmony and consumer expectations.
+\newblock {\em International Journal of Design}, 8(1):109--126, 2014.
+
+\bibitem{westland2007}
+S.~Westland, K.~Laycock, V.~Cheung, P.~Henry, and F.~Mahyar.
+\newblock Colour harmony.
+\newblock {\em Colour: Design and Creativity}, 1(1):1--15, 2007.
 
 \end{thebibliography}

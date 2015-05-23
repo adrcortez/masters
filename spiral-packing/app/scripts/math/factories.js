@@ -683,11 +683,10 @@ angular.module('math.factories', [])
         'Point2',
         'Vector2',
         'Circle',
-        'Segment',
         'EPSILON',
         'PI',
 
-        function (Point2, Vector2, Circle, Segment, EPSILON, PI) {
+        function (Point2, Vector2, Circle, EPSILON, PI) {
 
             // Define the constructor
             function Spiral (sweep, width, theta, omega, x, y) {
@@ -699,6 +698,7 @@ angular.module('math.factories', [])
 
                 this.parent = null;
                 this.children = [];
+                this.clips = [];
             }
 
             // Instance methods
@@ -819,101 +819,122 @@ angular.module('math.factories', [])
 
                     // Return the separation between the spiral radii
                     return d - (r0 + r1);
-                    // return this.center.getDistance(s.center);
                 },
 
                 intersects: function (s) {
-
-                    // if (!s) {
-                    //     return false;
-                    // }
-                    //
-                    // var r0 = this.getRadius(s.center.x, s.center.y);
-                    // var r1 = s.getRadius(this.center.x, this.center.y);
-
-                    // If the radii separation is negative then the
-                    // spirals intersect
-                    return this.getDistance(s) < EPSILON;
-                    // return this.getDistance(s) < (r0 + r1);
+                    return this.getDistance(s) < -EPSILON;
                 },
 
-                fit: function (SP, S2, S3) {
+
+                fit: function (S1, S2, S3) {
 
                     var S0 = this.clone(),
-                        S = this.clone(),
-                        S1 = SP.clone();
+                        r0 = S0.width * (S0.sweep - 1),
+                        c0 = new Circle(r0, S0.center.x, S0.center.y);
 
-                    S.index = this.index;
-                    S1.index = SP.index;
+                    // If S2 and S3 are the same spiral, then only fit to S2
+                    if (S2 && S2.equals(S3)) {
+                        S3 = null;
+                    }
 
-                    var r0 = S.width * (S.sweep - 1),
-                        c0 = new Circle(r0, S.center.x, S.center.y),
-                        rso = [0, 0, 0];
+                    // If S is closer to S3 than S2, swap S2 and S3
+                    if (S2 && S3 && S0.getDistance(S2) > S0.getDistance(S3)) {
+                        var temp = S2, S2 = S3, S3 = temp;
+                    }
 
-                    // console.log();
-                    // console.log('***** fit *****');
-                    // console.log(!!S2, !!S3);
-                    // console.log(S2 && S2.index, S3 && S3.index);
+                    // Determine the case we are trying to solve
+                    var case3 = S0.intersects(S2) && S0.intersects(S3);
+                    var case2 = S0.intersects(S2) && !S0.intersects(S3);
 
-                    while (true) {
+                    if (case3) { console.log('CASE III'); }
+                    else if (case2) { console.log('CASE II'); }
+                    else { console.log('CASE I'); }
 
-                        // Calculate the phase angle for the spiral
-                        var dx = SP.center.x - c0.center.x,
-                            dy = SP.center.y - c0.center.y,
-                            theta = Math.atan2(dy, dx);
+                    // The spiral to fit
+                    var S = S0.clone();
 
-                        S.center = new Point2(c0.center.x, c0.center.y);
-                        S.width = c0.radius / (S.sweep - 1);
-                        S.theta = theta;
+                    // The change in S's position as it is being fitted
+                    var delta = Infinity, threshold = 0.5;
 
-                        // Determine the approximating circles for the
-                        // bounding spirals
-                        var circles = _.map([S1, S2, S3], function (s, j) {
-                            if (!s) return;
+                    // Try to fit the spiral, maxing out at 150 iterations
+                    for (var i = 0; i < 150; i++) {
 
-                            var ri = s.getRadius(S.center.x, S.center.y),
-                                rsi = s.equals(S1) ?
+                        // The spiral's position is not changing significantly
+                        // anymore, so break
+                        if (delta < threshold) {
+                            break;
+                        }
+
+                        // The inner radius of the fitted spiral
+                        var rso = S.width * (S.sweep - 1);
+
+                        var circles = _.map([S1, S2, S3], function (s, i) {
+                            if (!s) {
+                                return;
+                            }
+
+                            // Get the radius of Si in the direction of S. This
+                            // is negative because it is in the opposite
+                            // direction of rsi.
+                            var ri = -s.getRadius(S.center.x, S.center.y);
+
+                            // Get the radius of S in the direction of Si
+                            var rsi = s.equals(S1) ?
                                     S.width * (S.sweep - 1) :
-                                    S.getRadius(s.center.x, s.center.y),
-                                rsp = s.equals(S1) ?
-                                    S.width * (S.sweep - 1) :
-                                    S0.getRadius(s.center.x, s.center.y);
+                                    S.getRadius(s.center.x, s.center.y);
 
-                            var r = ri + rso[j];
-                            // var r = ri - (rsi - rsp);
-
+                            // Determine the radius of the approximating
+                            // circle, ci
+                            var r = ri - (rsi - rso);
                             return new Circle(r, s.center.x, s.center.y);
                         });
 
+                        // The circle approximations
                         var c1 = circles[0],
                             c2 = circles[1],
                             c3 = circles[2];
 
-                        var delta = 0.01;
-
-
-                        // Do the circle fitting
-                        if (S.intersects(S2) && S.intersects(S3)) {
-                            // console.log('III: ' + [S.getDistance(S2), S.getDistance(S3)]);
-
+                        // Case III: Both spirals intersected
+                        if (case3) {
                             c0 = c0.fit(c1, c2, c3);
-                            rso[1] += delta;
-                            rso[2] += delta;
-                        } else if (S.intersects(S2) && S2.width > EPSILON) {
-                            // console.log('II-S2: ' + [S.getDistance(S2), S.getDistance(S3)]);
-
-                            c0 = c0.fit(c1, c2);
-                            rso[1] += delta;
-                        } else if (S.intersects(S3) && S3.width > EPSILON) {
-                            // console.log('II-S3: ' + [S.getDistance(S2), S.getDistance(S3)]);
-
-                            c0 = c0.fit(c1, c3);
-                            rso[2] += delta;
-                        } else {
-                            // console.log('I');
-                            break;
                         }
+
+                        // Case II: One spiral intersected
+                        else if (case2) {
+                            c0 = c0.fit(c1, c2);
+                        }
+
+                        // Case I: No intersection
+                        else {
+                            c0 = c0.fit(c1);
+                        }
+
+                        // delta is the difference between the new and previous
+                        // centers of c0. The previous center of c0 is the same
+                        // as the center of S at this point.
+                        delta = c0.center.getDistance(S.center);
+                        console.log(delta);
+
+                        // // Adjust the phase angle for the fitted spiral
+                        // // to ensure the terminal point lies on the line
+                        // // between the centers of S1 and S.
+                        // var dx = S1.center.x - c0.center.x,
+                        //     dy = S1.center.y - c0.center.y,
+                        //     theta = Math.atan2(dy, dx);
+
+                        // Update S
+                        S.center = new Point2(c0.center.x, c0.center.y);
+                        S.width = c0.radius / (S.sweep - 1);
+                        // S.theta = theta;
                     }
+
+                    // Adjust the phase angle for the fitted spiral
+                    // to ensure the terminal point lies on the line
+                    // between the centers of S1 and S.
+                    var dx = S1.center.x - c0.center.x,
+                        dy = S1.center.y - c0.center.y,
+                        theta = Math.atan2(dy, dx);
+                    S.theta = theta;
 
                     return S;
                 },
@@ -922,68 +943,154 @@ angular.module('math.factories', [])
                     return this.parent || null;
                 },
 
-                setParent: function (s) {
-                    this.parent = s;
-                },
-
                 getChildren: function () {
                     return this.children;
                 },
 
-                addChild: function (s) {
-                    s && this.children.push(s)
+                hasChild: function (child) {
+
+                    if (child) {
+                        for (var i = 0; i < this.children.length; i++) {
+                            if (this.children[i].equals(child)) {
+                                return true;
+                            };
+                        }
+                    }
+
+                    return false;
                 },
 
-                getClipPoint: function () {
+                addChild: function (child) {
 
-                    // The parent determines the clipping
-                    var parent = this.getParent();
-                    if (!parent) {
+                    // No child to add
+                    if (!child) {
                         return;
                     }
 
-                    // Clipping due to the parent will only happen
-                    // in the last half turn
-                    var tmin = this.sweep - 0.5,
-                        tmax = this.sweep,
-                        tdelta = 0.001;
-
-                    var tstart = null,
-                        tend = null;
-
-                    for (var t = tmin; t < tmax; t += tdelta) {
-                        var p = this.getPoint(t);
-                        if (parent.contains(p.x, p.y)) {
-                            return t;
-                        }
+                    // Add the child (avoid duplicates)
+                    child.parent = this;
+                    if (!this.hasChild(child)) {
+                        this.children.push(child);
                     }
+
+                    // Update the clip boundaries
+                    child.clips = child.getClips();
+                    this.clips = this.getClips();
                 },
 
-                getSegments: function () {
+                removeChild: function (s) {
 
-					var sweep = this.sweep,
-						clip = this.getClipPoint();
+                    // Nothing to remove
+                    if (!s) { return; }
 
-					// var tmax = !clip ? sweep : Math.min(sweep, clip);
-                    var tmax = sweep;
+                    // Get the current children
+                    var children = angular.copy(this.getChildren());
 
-                    // The number of segments to use when drawing the spiral
-                    var numSegments = tmax * 15;
+                    // Clear the children
+                    this.children = [];
 
-					// The amount to change at each iteration
-					var delta = 1 / 15;
+                    // Add back each old child, skipping the one to remove
+                    angular.forEach(children, function (c) {
+                        if (!c.equals(s)) {
+                            this.addChild(c);
+                        }
+                    }, this);
+                },
 
-					var segments = [];
-					for (var t = 0; t <= tmax; t += delta) {
+                getClips: function () {
+                    // return this.clips;
 
-						var t0 = Math.max(t, 0),
-							t1 = Math.min(t + delta, tmax);
+                    function getParentClip (child) {
+                        var T = child.sweep, dt = 0.01;
 
-                        var segment = new Segment(this, t0, t1);
-						segments.push(segment);
-					}
+                        // Get the point where the parent clips this spiral
+                        if (child.parent) {
+                            for (var t = T - 0.25; t <= T; t += dt) {
+                                var p = child.getPoint(t);
+                                if (child.parent.contains(p.x, p.y)) {
+                                    return { start: t - dt/2, end: T };
+                                }
+                            }
+                        }
+                    }
 
-					return segments;
+                    function getChildClip (parent, child) {
+
+                        var T = parent.sweep,
+                            theta = parent.theta,
+                            omega = parent.omega,
+                            cx = parent.center.x,
+                            cy = parent.center.y;
+
+                        // Determine when the child intersects this spiral
+                        var cclip = getParentClip(child);
+                        if (!cclip) { return; }
+
+                        // Get the x,y coordinate of the clip
+                        var u = child.getPoint(cclip.start);
+                        var v = child.getPoint(child.sweep - 1);
+
+                        // Get the t-value for this spiral at that coordinate
+                        var t1 = parent.getEdgeT(u.x, u.y),
+                            t2 = parent.getEdgeT(v.x, v.y);
+
+                        // Have to handle the spiral orientation
+                        return (t1 < t2) ?
+                            { start: t1, end: t2 } :
+                            { start: t2, end: t1 };
+                    }
+
+                    var clips = [];
+
+                    // Add the clip paths created by this spiral's children
+                    angular.forEach(this.children, function (child) {
+                        var cclip = getChildClip(this, child);
+                        cclip && clips.push(cclip);
+                    }, this);
+
+                    // Add the clip path created by this spiral's parent
+                    var pclip = getParentClip(this);
+                    pclip && clips.push(pclip);
+
+                    return clips;
+                },
+
+                clip: function (t1, t2) {
+
+                    var clips = this.clips;
+                    for (var i = 0; i < clips.length; i++) {
+
+                        var clip = clips[i],
+                            clip1 = (t1 > clip.start && t1 < clip.end),
+                            clip2 = (t2 > clip.start && t2 < clip.end);
+
+                        // Both t-values are inside clip range
+                        if (t1 >= clip.start && t2 <= clip.end) {
+                            return;
+                        }
+
+                        // Just the start t-value is inside clip range
+                        else if (t1 >= clip.start && t1 <= clip.end) {
+                            return [{ start: clip.end, end: t2 }];
+                        }
+
+                        // Just the end t-value is clipped
+                        else if (t2 >= clip.start && t2 <= clip.end) {
+                            return [{ start: t1, end: clip.start }];
+                        }
+
+                        // The t-values extend beyond both ends of the
+                        // clip range, resulting in 2 parts
+                        else if (t1 < clip.start && t2 > clip.end) {
+                            return [
+                                { start: t1, end: clip.start },
+                                { start: clip.end, end: t2 }
+                            ];
+                        }
+                    }
+
+                    // No clipping
+                    return [ { start: t1, end: t2 }];
                 },
 
                 equals: function (s) {
@@ -1001,6 +1108,14 @@ angular.module('math.factories', [])
                     return new Spiral(
                         this.sweep, this.width, this.theta,
                         this.omega, this.center.x, this.center.y);
+                },
+
+                getArea: function () {
+
+                    var T = this.sweep,
+                        w = this.width;
+
+                    return Math.PI*w*w/3 * (Math.pow(T, 3) - Math.pow(T-1, 3));
                 }
             };
 

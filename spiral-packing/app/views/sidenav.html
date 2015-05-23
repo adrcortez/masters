@@ -16,12 +16,12 @@
 
     <md-content role="navigation" ng-controller="SidenavCtrl">
 
-        <menu-toggle class="md-hue-1" tabindex="0" ng-class="{ open: expand0 }">
-            <md-button class="menu-header md-hue-1" ng-click="expand0 = !expand0">
+        <menu-toggle class="md-hue-1" tabindex="0" ng-class="{ open: expanded === 0 }">
+            <md-button class="menu-header md-primary md-raised" ng-click="expand(0)">
                 Parameters
             </md-button>
 
-            <menu-section ng-show="expand0" class="md-hue-1" layout-padding>
+            <menu-section ng-show="expanded === 0" class="md-hue-1" layout-padding>
                 <form name="settingsForm" novalidate>
                     <md-input-container>
                         <label>Number of turns</label>
@@ -39,19 +39,19 @@
                         </div>
                     </md-input-container>
 
-                    <md-switch ng-model="omega" ng-true-value="-1" ng-false-value="1" class="md-primary" ng-change="onChange()">
+                    <md-switch ng-model="omega" ng-true-value="1" ng-false-value="-1" class="md-primary" ng-change="onChange()">
                         Clockwise
                     </md-switch>
                 </form>
             </menu-section>
         </menu-toggle>
 
-        <menu-toggle class="md-hue-1" tabindex="1" ng-class="{ open: expand1 }">
-            <md-button class="menu-header md-hue-1" ng-click="expand1 = !expand1">
+        <menu-toggle class="md-hue-1" tabindex="1" ng-class="{ open: expanded === 1 }">
+            <md-button class="menu-header md-primary md-raised" ng-click="expand(1)">
                 Behavior / Effects
             </md-button>
 
-            <menu-section ng-show="expand1" layout-padding>
+            <menu-section ng-show="expanded === 1" layout-padding>
                 <form novalidate>
                     <md-checkbox ng-model="alternate" aria-label="alternate" class="md-primary" ng-change="onChange()">
                         Alternate orientation
@@ -64,106 +64,129 @@
             </menu-section>
         </menu-toggle>
 
-        <menu-toggle class="md-hue-1" tabindex="1" ng-class="{ open: expand2 }">
-            <md-button class="menu-header md-hue-1" ng-click="expand2 = !expand2">
+        <menu-toggle class="md-hue-1" tabindex="1" ng-class="{ open: expanded === 2 }">
+            <md-button class="menu-header md-primary md-raised" ng-click="expand(2)">
                 Boundary Shapes
             </md-button>
 
-            <menu-section ng-show="expand2" layout-padding>
+            <menu-section ng-show="expanded === 2" layout-padding>
                 <form novalidate>
-                    <md-input-container layout="row">
-                        <md-button class="md-icon-button"
-                                   ng-repeat="(name, shape) in getBoundaryShapes()"
-                                   ng-class="{ 'md-primary md-raised': isSelected(name) }"
-                                   ng-click="setBoundaryShape(name)"
-                                   ng-attr-aria-label="{{ name }}">
-                            <md-tooltip>{{ name | capitalize }}</md-tooltip>
-                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-{{ name }}"></md-icon>
+                    <div layout="row">
+                        <!-- <md-button class="md-icon-button" ng-class="{ 'md-primary md-raised': isSelected(CIRCLE) }" ng-click="setBoundary(CIRCLE)" aria-label="circle">
+                            <md-tooltip>Circle</md-tooltip>
+                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-circle"></md-icon>
+                        </md-button> -->
+
+                        <md-button class="md-icon-button" ng-class="{ 'md-primary md-raised': isSelected(RECTANGLE) }" ng-click="setBoundary(RECTANGLE)" aria-label="rectangle">
+                            <md-tooltip>Rectangle</md-tooltip>
+                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-rectangle"></md-icon>
                         </md-button>
 
-                        <!-- <md-button class="md-icon-button">
-                            <md-tooltip>Square</md-tooltip>
-                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-square"></md-icon>
-                        </md-button>
-                        <md-button class="md-icon-button">
+                        <md-button class="md-icon-button" ng-class="{ 'md-primary md-raised': isSelected(TRIANGLE) }" ng-click="setBoundary(TRIANGLE)" aria-label="triangle">
                             <md-tooltip>Triangle</md-tooltip>
                             <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-triangle"></md-icon>
                         </md-button>
-                        <md-button class="md-icon-button">
-                            <md-tooltip>Circle</md-tooltip>
-                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-circle"></md-icon>
+
+                        <md-button class="md-icon-button" ng-class="{ 'md-primary md-raised': isSelected(PSEUDO_TRIANGLE) }" ng-click="setBoundary(PSEUDO_TRIANGLE)" aria-label="pseudo-triangle">
+                            <md-tooltip>Pseudo-Triangle</md-tooltip>
+                            PT
                         </md-button>
-                        <md-button class="md-icon-button">
+
+                        <md-button class="md-icon-button" ng-class="{ 'md-primary md-raised': isSelected(STAR) }" ng-click="setBoundary(STAR)" aria-label="star">
                             <md-tooltip>Star</md-tooltip>
-                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-star"></md-icon>
-                        </md-button> -->
-                    </md-input-container>
+                            <md-icon md-font-icon="mdi mdi-2x mdi-star-outline"></md-icon>
+                        </md-button>
+                    </div>
+
+                    <md-button class="md-primary" ng-click="clearBoundary()" aria-label="clear">
+                        Clear
+                    </md-button>
                 </form>
             </menu-section>
         </menu-toggle>
 
-        <!-- <menu-toggle class="md-hue-1" tabindex="1" ng-class="{ open: expand2 }">
-            <md-button class="menu-header md-hue-1" ng-click="expand2 = !expand2">
-                Shapes
+        <menu-toggle class="md-hue-1" tabindex="1" ng-class="{ open: expanded === 3 }">
+            <md-button class="menu-header md-primary md-raised" ng-click="expand(3)">
+                Colors
             </md-button>
 
-            <menu-section ng-show="expand2" layout-padding>
+            <menu-section ng-show="expanded === 3" layout-padding>
                 <form novalidate>
-                    <md-input-container layout="row">
-                        <md-button class="md-icon-button" style="font-weight:bold;">
-                            <md-tooltip>Seed</md-tooltip>
-                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-seed"></md-icon>
-                        </md-button>
-                        <md-button class="md-icon-button">
-                            <md-tooltip>Spiral</md-tooltip>
-                            <md-icon md-font-icon="icon icon-fw icon-2x icon-bold icon-spiral"></md-icon>
-                        </md-button>
-                    </md-input-container>
+                    <md-tabs md-dynamic-height md-center-tabs>
+                        <md-tab label="Color Sets">
+                            <md-content>
+                                <md-radio-group ng-model="group">
+                                    <md-radio-button value="primary" class="md-primary">Primary Colors</md-radio-button>
+                                    <md-radio-button value="secondary" class="md-primary">Secondary Colors</md-radio-button>
+                                    <md-radio-button value="tertiary" class="md-primary">Tertiary Colors</md-radio-button>
+                                </md-radio-group>
+                            </md-content>
+                        </md-tab>
+
+                        <md-tab label="Color Schemes">
+                            <md-content>
+                                <md-subheader class="md-primary">Choose a primary color</md-subheader>
+                                <input type="color" ng-model="color" style="margin-left:15px;"/>
+
+                                <md-subheader class="md-primary">Choose a color scheme</md-subheader>
+                                <md-radio-group ng-model="scheme" ng-disabled="!color">
+                                    <md-radio-button value="complementary" class="md-primary">Complementary</md-radio-button>
+                                    <md-radio-button value="split-complementary" class="md-primary">Split-Complementary</md-radio-button>
+                                    <md-radio-button value="triadic" class="md-primary">Triadic</md-radio-button>
+                                    <md-radio-button value="double-complementary" class="md-primary">Tetradic</md-radio-button>
+                                    <md-radio-button value="monochromatic" class="md-primary">Monochromatic</md-radio-button>
+                                    <md-radio-button value="analogous" class="md-primary">Analogous</md-radio-button>
+                                </md-radio-group>
+                            </md-content>
+                        </md-tab>
+
+                        <md-tab label="Color Picker">
+                            <md-content>
+                                <md-subheader class="md-primary">Choose colors</md-subheader>
+                                <input type="color" ng-model="color" style="margin-left:15px;"/>
+
+                                <md-button class="md-primary md-raised" ng-click="addColor(color)" aria-label="clear" ng-disabled="!color">
+                                    Add Color
+                                </md-button>
+                            </md-content>
+                            <!-- <color-picker ng-model="color" ng-change="addColor(color)"></color-picker> -->
+                        </md-tab>
+                    </md-tabs>
                 </form>
             </menu-section>
-        </menu-toggle> -->
+
+            <menu-section layout-padding style="padding-bottom:20px;">
+                <md-contact-chips
+                    ng-if="colors.length"
+                    ng-model="colors"
+                    md-contacts="queryColor($query)"
+                    md-contact-name="hex"
+                    md-contact-image="data"
+                    filter-selected="true"
+                    class="md-mini"
+                    ng-change="onChange()">
+                </md-contact-chips>
+            </menu-section>
+        </menu-toggle>
 
         <menu-link class="md-hue-1" tabindex="2" md-no-ink>
-            <md-button class="menu-header md-hue-1">
-                Colors
+            <md-button class="menu-header md-primary md-raised">
+                Metrics
             </md-button>
 
             <menu-section layout-padding>
                 <form novalidate>
-                    <md-input-container>
-                        <color-picker ng-model="color" ng-change="addColor(color)"></color-picker>
-
-                        <md-contact-chips
-                            ng-if="colors.length"
-                            ng-model="colors"
-                            md-contacts="queryColor($query)"
-                            md-contact-name="hex"
-                            md-contact-image="data"
-                            filter-selected="true"
-                            class="md-mini"
-                            ng-change="onChange()"
-                            ng-disabled="true">
-                        </md-contact-chips>
-
-                    </md-input-container>
+                    <table class="table table-striped">
+                        <tr><td># spirals:</td>              <td>{{ (spirals.length || 0 ) | number:0 }}</td></tr>
+                        <tr><td>A<sub>packing</sub>:</td>    <td>{{ (packedArea || 0) / 100 | number:3 }}</td></tr>
+                        <tr><td>A<sub>boundary</sub>:</td>   <td>{{ (boundaryArea || 0) / 100 | number:3 }}</td></tr>
+                        <tr><td>Porosity:</td>               <td>{{ (porosity || 1) | number:3 }}</td></tr>
+                        <tr><td>Balance<sub>vert</sub>:</td> <td>{{ (balance.vertical | number:3) || '--' }}</td></tr>
+                        <tr><td>Balance<sub>horz</sub>:</td> <td>{{ (balance.horizontal | number:3) || '--' }}</td></tr>
+                        <tr><td>Color Harmony:</td>          <td>{{ (colorHarmony | number:3) || '--' }}</td></tr>
+                    </table>
                 </form>
             </menu-section>
         </menu-link>
-
-
-
-        <!-- <md-button ng-click="close()" class="md-primary">
-          Close Sidenav Right
-        </md-button> -->
-        <!-- <ul ng-show="isOpen()" class="menu-toggle-list" aria-hidden="false">
-            <li ng-repeat="page in section.pages" class="ng-scope">
-            <menu-link section="page" class="ng-isolate-scope">
-                <a class="md-button md-default-theme" ng-transclude="" ng-class="{'active' : isSelected()}" ng-href="#/demo/material.components.autocomplete" ng-click="focusSection()" tabindex="0" href="#/demo/material.components.autocomplete"><span class="ng-binding ng-scope">
-                Autocomplete
-            </span><!-- ngIf: isSelected() -->
-            <!-- <div class="md-ripple-container"></div></a>
-            </menu-link>
-            </li>
-        </ul> -->
     </md-content>
 </md-sidenav>

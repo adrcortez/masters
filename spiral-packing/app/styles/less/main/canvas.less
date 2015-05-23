@@ -4,25 +4,37 @@
     background: #fff;
     outline: none;
 
-    .editing {
+    &.editing {
         cursor: crosshair;
-    }
-
-    .spiral {
-
-        &:hover path {
-            cursor: pointer;
-        }
     }
 
     .border {
         fill: transparent;
+        stroke: rgb(198,40,40);
+        stroke-width: 1;
+        stroke-dasharray: 5,5;
         opacity: 0;
 
         &:hover {
             opacity: 1;
-            stroke: rgb(198,40,40);
             cursor: pointer;
+        }
+
+        &.selected {
+            opacity: 1;
+            stroke-dasharray: none;
+        }
+    }
+
+    .selected .border:first-child {
+        opacity: 1;
+        stroke-dasharray: none;
+    }
+
+    .spiral {
+        & .body {
+            &.selected { outline: 2px solid red !important; }
+            &:hover { outline: 2px dashed red; }
         }
     }
 }

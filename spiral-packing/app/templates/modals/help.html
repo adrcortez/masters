@@ -1,43 +1,44 @@
-<md-dialog aria-label="Save Image">
+<md-dialog aria-label="Save Image" style="width:80%;">
+    <md-dialog-content class="sticky-container">
+        <md-subheader class="md-sticky-no-effect">
+            <h2 class="md-subhead">
+                <md-icon md-font-icon="mdi mdi-lg mdi-help"></md-icon>
+                How does this thing work?
+            </h2>
+        </md-subheader>
 
-    <md-subheader class="md-sticky-no-effect">
-        <h2 class="md-subhead">
-            <md-icon md-font-icon="mdi mdi-lg mdi-help"></md-icon>
-            How does this thing work?
-        </h2>
-    </md-subheader>
+        <div>
+            <md-tabs md-dynamic-height md-border-bottom>
+                <md-tab label="Components">
+                    <md-content class="md-padding">
+                        <h1 class="md-subhead">The Drawing Area</h1>
+                        <p></p>
 
-    <md-content class="dialog-content sticky-container">
-        <md-tabs md-dynamic-height md-border-bottom>
-            <md-tab label="Components">
-                <md-content class="md-padding">
-                    <h1 class="md-subhead">The Drawing Area</h1>
-                    <p></p>
+                        <h5 class="md-display-subhead">Edit Mode</h5>
+                        <p>Something about edit mode...</p>
+                        <p>When you're finished editing, click the <b>'Done Editing'</b> button to exit edit mode.</p>
+                    </md-content>
+                </md-tab>
 
-                    <h5 class="md-display-subhead">Edit Mode</h5>
-                    <p>Something about edit mode...</p>
-                    <p>When you're finished editing, click the <b>'Done Editing'</b> button to exit edit mode.</p>
-                </md-content>
-            </md-tab>
+                <md-tab label="General Actions">
+                    <md-content class="md-padding">
+                        <h1 class="md-display-2">Adding Seed Spirals</h1>
+                        <p>Click on the drawing area to place seed spirals.</p>
+                    </md-content>
+                </md-tab>
 
-            <md-tab label="General Actions">
-                <md-content class="md-padding">
-                    <h1 class="md-display-2">Adding Seed Spirals</h1>
-                    <p>Click on the drawing area to place seed spirals.</p>
-                </md-content>
-            </md-tab>
+                <md-tab label="Specific Actions">
+                    <md-content class="md-padding">
+                        <h1 class="md-display-2">Editing Spirals</h1>
+                        <p></p>
 
-            <md-tab label="Specific Actions">
-                <md-content class="md-padding">
-                    <h1 class="md-display-2">Editing Spirals</h1>
-                    <p></p>
-
-                    <h5 class="md-display-subhead">Branching Spirals</h5>
-                    <p>Click on the drawing area to place new spirals.</p>
-                </md-content>
-            </md-tab>
-        </md-tabs>
-    </md-content>
+                        <h5 class="md-display-subhead">Branching Spirals</h5>
+                        <p>Click on the drawing area to place new spirals.</p>
+                    </md-content>
+                </md-tab>
+            </md-tabs>
+        </div>
+    </md-dialog-content>
 
     <div class="md-actions" layout="row">
         <md-button ng-click="ok()" class="md-primary md-raised">

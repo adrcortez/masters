@@ -1,0 +1,47 @@
+\begin{algorithm*}
+\caption{General fitting algorithm for cases I, II, and III}
+\label{alg:fitting}
+\begin{algorithmic}
+	\Require The child spiral $S_{0}$ centered at the preferred location with specified 
+		      	number of turns $T$, width $w$, and orientation $\omega$.
+	\Require The parent spiral $S_{1}$ to branch from.
+	\Require The neighboring spirals $S_{2}$ and $S_{3}$ to fit to.
+	\Ensure The fitted child spiral $S$
+    	
+	\Function{fit}{$S_{0}$, $S_{1}$, $S_{2}$, $S_{3}$}
+		\State $S$ $\gets$ $S_{0}$
+		\State $c_{0}$ $\gets$ circle centered at $S_{0}.center$ with
+	         \State \hskip 10mm     radius equal to $w(T-1)$
+	         \State $\Delta$ $\gets$ $+\infty$
+	         \State
+		         
+	         \Repeat
+		        	\State \textit{// Approximate the spirals as circles}
+		        	\For{each spiral $S_{i = \{1,2,3\}}$ to be fitted to}
+				\State $r_{i}$ $\gets$ radius of $S_{i}$ toward $S.center$
+				\State $r_{si}$ $\gets$ radius of $S$ toward $S_{i}.center$
+				\State $r_{so}$ $\gets$ $S.width * (S.sweep - 1)$
+				\State $c_{i}$ $\gets$ circle centered at $S_{i}.center$ with radius $r_{i} - (r_{si} - r_{so})$
+			\EndFor
+			\State
+				
+			\State \textit{// Do the circle fitting}
+			\If{no intersection} 
+				\State Fit $c_{0}$ to $c_{1}$ 
+			\EndIf
+			\If{$S$ intersects only $S_{2}$} 
+				\State Fit $c_{0}$ to $c_{1}$ and $c_{2}$ 
+			\EndIf
+			\If{$S$ intersects both $S_{2}$ and $S_{3}$} 
+				\State Fit $c_{0}$ to $c_{1}$, $c_{2}$, and $c_{3}$ 
+			\EndIf
+				
+			\State
+			\State $\Delta$ $\gets$ difference in $c_{0}$'s new and previous centers
+			\State $S.center$ $\gets$ $c_{0}.center$
+			\State $S.width$ $\gets$ $c_{0}.radius/(T-1)$
+		\Until{$\Delta$ $<$ threshold}
+		\State \Return $S$
+	\EndFunction
+\end{algorithmic}
+\end{algorithm*}

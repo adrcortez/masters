@@ -1,3 +1,10 @@
+html {
+    font-size: 12px;
+}
+
+div[color-picker-image] div:first-child {
+    margin: 0 auto;
+}
 
 :focus {outline:none;}
 ::-moz-focus-inner {border:0;}
@@ -8,6 +15,7 @@
 
 .md-chips {
     font-size: 1.2rem;
+    box-shadow: none !important;
 
     .md-contact-avatar img {
         border: 3px solid transparent;
@@ -16,22 +24,26 @@
     .md-chip {
         box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
         text-transform: lowercase;
+        padding: 0;
 
         &.md-mini {
             font-size: 0.8em;
         }
 
+        .md-chip-content {
+            padding: 0;
+        }
+
+        .md-contact-name {
+            display: none !important;
+        }
+
         .md-chip-remove {
             opacity: 0.3;
-            width: 2.5rem;
+            width: 2rem;
 
             &:hover {
                 opacity: 1;
-            }
-
-            md-icon {
-                width: 1.4rem;
-                height: 1.4rem;
             }
         }
     }
@@ -45,6 +57,10 @@ md-icon {
     display: inline !important;
     color: inherit !important;
     vertical-align: baseline !important;
+
+    &[md-font-icon] {
+        line-height: inherit;
+    }
 }
 
 .md-button {
@@ -52,11 +68,11 @@ md-icon {
     vertical-align: middle;
 
     &.md-mini {
-        height: 3.2rem;
+        height: 0.8rem;
         width: auto;
-        line-height: 3.2rem;
+        line-height: 0.8rem;
         padding: 0 0.8rem;
-        font-size: 1.2rem;
+        font-size: 0.8rem;
     }
 
     &.disabled,
@@ -66,8 +82,6 @@ md-icon {
 }
 
 md-sidenav {
-    min-width: 0 !important;
-    width: auto !important;
 
     md-content {
 
@@ -129,4 +143,9 @@ md-sidenav {
             }
         }
     }
+}
+
+.disabled, *[disabled] {
+    opacity: 0.3;
+    pointer-events: none;
 }

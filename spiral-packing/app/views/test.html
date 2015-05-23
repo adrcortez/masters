@@ -1,83 +1,63 @@
-<md-content class="md-hue-1" layout="column" layout-padding flex>
+<md-content class="md-hue-1" layout="row" layout-align="space-between center">
+    <div layout="row" layout="center center" layout-padding>
+        <md-button ng-click="test_edge($event)">
+            Test Edge
+        </md-button>
 
-    <svg-canvas class="canvas flex md-whiteframe-z1">
+        <md-button ng-click="test_intersect($event)">
+            Test Intersect
+        </md-button>
 
-        <g stroke="black" fill="none" ng-repeat="l in getBoundaries()">
+        <md-button ng-click="test_radius($event)">
+            Test Radius
+        </md-button>
 
-            <!-- <svg-line sx="100" sy="100" ex="200" ey="200"></svg-line>
-            <svg-line sx="200" sy="200" ex="200" ey="300" cx="250" cy="250"></svg-line> -->
+        <md-button ng-click="test_fit($event)">
+            Test Fit
+        </md-button>
 
-            <svg-line start="l.start" end="l.end" control="l.control" />
-        </g>
+        <md-button ng-click="test_circles($event)">
+            Test circles
+        </md-button>
 
-        <g ng-repeat="s in boundingSpirals" ng-init="p = s.center" stroke="red">
-            <circle ng-attr-cx="{{ p.x }}" ng-attr-cy="{{ p.y }}" r="1" />
-        </g>
-    </svg-canvas>
-
-    <!-- <div class="btn-toolbar" role="toolbar">
-
-        <div class="btn-group">
-            <a class="btn btn-default" ng-click="test_circles()">
-                Test Circles
-            </a>
-
-            <a class="btn btn-default" ng-click="test_circles2()">
-                Test Circles 2
-            </a>
-
-            <a class="btn btn-default" ng-click="test_spirals()">
-                Test Spirals
-            </a>
-
-            <a class="btn btn-default" ng-click="test_fit(); test_fit2();">
-                Test Fit
-            </a>
-        </div>
+        <md-button ng-click="test_bounding($event)">
+            Test bounding
+        </md-button>
     </div>
+</md-content>
 
-    <div id="canvas">
-        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="1000">
+<md-content class="md-hue-1">
+    <div>A<sub>S</sub>{{ S.getArea() }}</div>
+    <div>A<sub>min</sub>{{ 3.14159265359*(S.width*(S.sweep -1))*(S.width*(S.sweep -1)) }}</div>
+    <div>A<sub>max</sub>{{ 3.14159265359*(S.width*S.sweep)*(S.width*S.sweep) }}</div>
+</md-content>
 
-            <circle ng-repeat="c in input.circles track by $index"
-                    ng-attr-r="{{ c.radius }}"
-                    ng-attr-cx="{{ c.center.x }}"
-                    ng-attr-cy="{{ c.center.y}} "
-                    ng-attr-stroke="{{ c.color || 'black' }}"
-                    fill="transparent" />
+<md-content class="md-hue-1" layout="column" layout-padding flex>
+    <svg-canvas class="canvas flex md-whiteframe-z1" stroke-width="1">
 
-            <circle ng-repeat="c in output.circles track by $index"
-                    ng-attr-r="{{ c.radius }}"
-                    ng-attr-cx="{{ c.center.x }}"
-                    ng-attr-cy="{{ c.center.y}} "
-                    ng-attr-stroke="{{ c.color || 'black' }}"
-                    fill="transparent"
-                    stroke-dasharray="5,7"/>
+        <!-- <g stroke="black" fill="none" ng-repeat="l in getBoundaries()">
+            <svg-line start="l.start" end="l.end" control="l.control" />
+        </g> -->
 
-            <path ng-repeat="s in input.spirals track by $index"
-                  ng-attr-stroke="{{ s.color || 'black' }}"
-                  ng-attr-d="{{ s.getPath() }}"
-                  fill="transparent" />
+        <!-- <g ng-repeat="s in boundingSpirals" ng-init="p = s.center" stroke="red">
+            <circle ng-attr-cx="{{ p.x }}" ng-attr-cy="{{ p.y }}" r="1" />
+        </g> -->
 
-            <path ng-repeat="s in output.spirals track by $index"
-                  ng-attr-stroke="{{ s.color || 'black' }}"
-                  ng-attr-d="{{ s.getPath() }}"
-                  fill="transparent"
-                  stroke-dasharray="5,7" />
+        <svg-spiral spiral="S" stroke="black" fill="none"></svg-spiral>
+        <g ng-repeat="s in spirals">
+            <svg-spiral spiral="s" ng-attr-stroke="{{ s.intersects(S) ? 'red' : 'green' }}" fill="none" stroke-width="2"></svg-spiral>
+            <text ng-attr-x="{{ s.center.x }}" ng-attr-y="{{ s.center.y }}">S{{$index}}</text>
+        </g>
 
-          <circle ng-repeat="p in input.points track by $index"
-                  ng-attr-cx="{{ p.x }}"
-                  ng-attr-cy="{{ p.y}} "
-                  ng-attr-stroke="{{ p.color || 'black' }}"
-                  ng-attr-fill="{{ p.color || 'black' }}"
-                  r="2" />
+        <g ng-repeat="p in points">
+            <circle ng-attr-cx="{{ p.x }}" ng-attr-cy="{{ p.y }}" r="2" ng-attr-fill="{{ ['green', 'blue', 'red', 'orange', 'black'][$index % 5] }}" />
+            <text ng-attr-x="{{ p.x }}" ng-attr-y="{{ p.y }}">p{{$index}}</text>
+        </g>
 
-          <circle ng-repeat="p in output.points track by $index"
-                  ng-attr-cx="{{ p.x }}"
-                  ng-attr-cy="{{ p.y}} "
-                  ng-attr-stroke="{{ p.color || 'black' }}"
-                  ng-attr-fill="{{ p.color || 'black' }}"
-                  r="2" />
-        </svg>
-    </div> -->
+        <g ng-repeat="c in circles">
+            <circle ng-attr-cx="{{ c.center.x }}" ng-attr-cy="{{ c.center.y }}" ng-attr-r="{{ c.radius }}" ng-attr-stroke="{{ ['green', 'blue', 'red', 'orange', 'black'][$index % 5] }}" stroke-dasharray="5,5" fill="none" />
+        </g>
+
+
+    </svg-canvas>
 </md-content>

@@ -16,12 +16,18 @@ angular.module('svg.directives', ['RecursionHelper'])
 
 	            link: function ($scope, element, attrs, ctrl, transclude) {
 
-					// $scope.getShapes = function () {
-					// 	return $canvas.getShapes();
-					// };
+					attrs.$observe('scale', function (scale) {
+						$scope.scale = scale;
+					});
 
-					attrs.$observe('scale', function() {
-						$scope.scale = attrs.scale;
+					attrs.$observe('translateX', function (translateX) {
+						console.log(translateX);
+						$scope.translateX = translateX;
+					});
+
+					attrs.$observe('translateY', function (translateY) {
+						console.log(translateY);
+						$scope.translateY = translateY;
 					});
 
 					// Appends the transcluded content into
@@ -56,7 +62,6 @@ angular.module('svg.directives', ['RecursionHelper'])
 		}
 	])
 
-
 	.directive('svgSpiral', [
 		'RecursionHelper',
 		'Color',
@@ -68,17 +73,9 @@ angular.module('svg.directives', ['RecursionHelper'])
 	            templateUrl: 'templates/svg/spiral.html',
 				templateNamespace: 'svg',
 				scope: {
-					// sweep: '&?',
-					// width: '&?',
-					// theta: '&?',
-					// omega: '&?',
-					// cx: '&?',
-					// cy: '&?',
-					colors: '&?',
-					flat: '&?',
-					clip: '&?',
-					children: '=?',
-					spiral: '='
+					spiral: '=',
+					ngClick: '&?',
+					selected: '='
 				},
 
 				compile: function (element) {
@@ -93,28 +90,29 @@ angular.module('svg.directives', ['RecursionHelper'])
 						$scope.omega = spiral.omega;
 						$scope.cx = spiral.center.x;
 						$scope.cy = spiral.center.y;
-						$scope.index = spiral.index;
 
 
 						// The spiral is broken up into multiple
 						// segments for rendering
-						var numSegments = $scope.sweep * 20;
-
-						// The spiral colors
-						// var colors = angular.copy($scope.colors());
-						var colors = angular.copy(spiral.colors);
-
-						if (colors && colors.length) {
-							// Since the first third of the segments are rather small,
-							// duplicate the first color to more evenly apply
-							// it to the spiral relative to the other colors
-							colors.unshift(colors[0]);
+						var segmentsPerTurn = 15,
+							numSegments = $scope.sweep * segmentsPerTurn;
 
 
-							// Split the color into the necessary number
-							// of sub-colors, 1 more than the number of segments
-							colors = Color.split(numSegments + 1, colors);
-						}
+						// // The spiral colors
+						// if (spiral.colors && spiral.colors.length) {
+						//
+						// 	// Don't modify the original array
+						// 	var colors = angular.copy(spiral.colors);
+						//
+						// 	// Since the first third of the segments are rather small,
+						// 	// duplicate the first color to more evenly apply
+						// 	// it to the spiral relative to the other colors
+						// 	colors.unshift(colors[0]);
+						//
+						// 	// Split the color into the necessary number
+						// 	// of sub-colors, 1 more than the number of segments
+						// 	$scope.colors = Color.split(numSegments + 1, colors);
+						// }
 
 
 						function getPoint (t) {
@@ -151,19 +149,55 @@ angular.module('svg.directives', ['RecursionHelper'])
 						}
 
 
+						function getStroke () {
+
+							var tmin = 0,
+								tmax = $scope.sweep;
+
+							// The amount to change at each iteration
+							var delta = 1 / segmentsPerTurn;
+
+							var segments = [];
+							for (var t = tmin; t < tmax; t += delta) {
+
+								var t0 = t,
+									t1 = Math.min(t + delta, tmax);
+
+								// Determine if the segment should be clipped.
+								// Only happens on outer turn
+								var parts = (t0 >= $scope.sweep - 1) ?
+									spiral.clip(t0, t1) :
+									[{ start: t0, end: t1 }];
+
+								// For each range part returned, create
+								// a segment, taking clipping into account
+								angular.forEach(parts, function (part) {
+									var p0 = getPoint(part.start),
+										p1 = getPoint(part.end + 0.005);
+
+									var c1 = getControlPoint(part.start, part.end);
+
+									// A segment a series of points
+									segments.push([ p0, c1, p1 ]);
+								});
+							}
+
+							return segments;
+						}
+
 						function getSegments (tmin, tmax) {
 
 							tmin = tmin || 0;
 							tmax = tmax || $scope.sweep;
 
 							// The amount to change at each iteration
-							var delta = 1 / 20;
+							var delta = 1 / segmentsPerTurn;
 
 							var segments = [];
 							for (var t = tmin; t < tmax; t += delta) {
 
 								var t0 = t,
-									t1 = Math.min(t + delta + 0.005, tmax),
+									t1 = Math.min(t + delta, tmax) + 0.005,
 									t2 = Math.max(t1 - 1, 0),
 									t3 = Math.max(t0 - 1, 0);
 
@@ -191,30 +225,72 @@ angular.module('svg.directives', ['RecursionHelper'])
 						$scope.outerSegments = getSegments($scope.sweep - 1, $scope.sweep);
 						$scope.innerSegments = getSegments(0, $scope.sweep - 1);
 						$scope.isFlat = spiral.isFlat || false;
-						$scope.colors = colors;
+						$scope.strokeWidth = $scope.$eval(attrs.strokeWidth) || 1;
+						// $scope.stroke = getStroke();
 
-						$scope.strokeWidth = $scope.$eval(attrs.strokeWidth);
 
-						$scope.$watch('children.length', function (value) {
+						$scope.onClick = function ($event) {
+							var ngClick = $scope.ngClick();
+							ngClick && ngClick(spiral, $event);
+						}
 
-							angular.forEach(spiral.children, function (s) {
 
-								// Determine where the child meets the parent
-								var t = spiral.getEdgeT(s.center.x, s.center.y);
-								var i = Math.floor(20 * t);
+						// Update the scope
+						$scope.$watch('spiral.children.length', function (newLen, oldLen) {
 
-								// Determine the parent color where they meet
-								var color = colors[i];
-								var clrs = angular.copy(s.colors);
+							// Child was added
+							if (newLen > oldLen) {
 
-								// Make the child end on that color. Add it
-								// twice to offset the effects of clipping
-								clrs.push(color);
-								clrs.push(color);
-								s.colors = clrs;
-							});
+								if ($scope.colors) {
+									// The new child spiral
+									var s = spiral.children[newLen - 1];
 
+									// Determine where the child meets the parent
+									var t = spiral.getEdgeT(s.center.x, s.center.y);
+									var i = Math.floor(segmentsPerTurn * t);
+
+									// Determine the parent color where they meet
+									var parentColor = $scope.colors[i],
+										colors = angular.copy(s.colors);
+
+									console.log(parentColor);
+
+									// Make the child end on that color. Add it
+									// twice to offset the effects of clipping
+									colors.push(parentColor);
+									colors.push(parentColor);
+									s.colors = colors;
+								}
+							}
+
+							// // Update the scope
 							$scope.children = spiral.children;
+							$scope.stroke = getStroke();
+						});
+
+						$scope.$watch('spiral.colors.length', function () {
+
+							// The spiral colors
+							if (!spiral.colors || !spiral.colors.length) {
+								$scope.colors = null;
+							} else {
+
+								// Don't modify the original array
+								var colors = angular.copy(spiral.colors);
+
+								// Since the first third of the segments are rather small,
+								// duplicate the first color to more evenly apply
+								// it to the spiral relative to the other colors
+								colors.unshift(colors[0]);
+
+								// Split the color into the necessary number
+								// of sub-colors, 1 more than the number of segments
+								$scope.colors = Color.split(numSegments + 1, colors);
+							}
+						});
+
+						$scope.$watch('selected', function (s) {
+							$scope.isSelected = s && s.equals(spiral);
 						});
 		            });
 				}

@@ -1,27 +1,29 @@
 <md-dialog aria-label="Save Image">
-    <md-subheader class="md-sticky-no-effect">
-        <h4 class="md-subhead">
-            <md-icon md-font-icon="mdi mdi-lg mdi-save"></md-icon>
-            Save Image
-        </h4>
-    </md-subheader>
+    <md-dialog-content class="sticky-container">
+        <md-subheader class="md-sticky-no-effect">
+            <h4 class="md-subhead">
+                <md-icon md-font-icon="mdi mdi-lg mdi-save"></md-icon>
+                Save Image
+            </h4>
+        </md-subheader>
 
-    <md-content class="dialog-content sticky-container">
-        <form name="saveform" novalidate>
-            <md-input-container>
-                <label>Filename</label>
-                <input name="filename" ng-model="filename" required>
-                <div ng-messages="saveform.filename.$error">
-                    <div ng-message="required">Required</div>
+        <div>
+            <form name="saveform" novalidate>
+                <md-input-container>
+                    <label>Filename</label>
+                    <input name="filename" ng-model="filename" required>
+                    <div ng-messages="saveform.filename.$error">
+                        <div ng-message="required">Required</div>
+                    </div>
+                </md-input-container>
+
+                <div layout="row">
+                    <md-button class="md-hue-1 md-mini" ng-class="{ 'md-accent md-raised md-hue-2 active': !type || type === 'png' }" ng-click="type = 'png'">.png</md-button>
+                    <md-button class="md-hue-1 md-mini" ng-class="{ 'md-accent md-raised md-hue-2 active': type === 'jpg' }" ng-click="type = 'jpg'">.jpg</md-button>
                 </div>
-            </md-input-container>
-
-            <div layout="row">
-                <md-button class="md-hue-1 md-mini" ng-class="{ 'md-accent md-raised md-hue-2 active': !type || type === 'png' }" ng-click="type = 'png'">.png</md-button>
-                <md-button class="md-hue-1 md-mini" ng-class="{ 'md-accent md-raised md-hue-2 active': type === 'jpg' }" ng-click="type = 'jpg'">.jpg</md-button>
-            </div>
-        </form>
-    </md-content>
+            </form>
+        </div>
+    </md-dialog-content>
 
     <div class="md-actions" layout="row">
         <md-button class="md-mini" ng-click="cancel()">Cancel</md-button>

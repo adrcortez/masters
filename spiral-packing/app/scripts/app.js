@@ -38,7 +38,7 @@
             })
             .when('/test', {
                 templateUrl: 'views/test.html',
-                controller: 'MainCtrl'
+                controller: 'TestCtrl'
             })
             .otherwise({
                 redirectTo: '/'
